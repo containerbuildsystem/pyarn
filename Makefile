@@ -11,7 +11,7 @@ devel:
 	rm setup.py
 
 clean:
-	rm -rf *.egg-info dist build .pytest_cache */__pycache__
+	rm -rf *.egg-info dist build .pytest_cache */__pycache__ pyarn/parsetab.py pyarn/parser.out
 
 build:
 	python -m build

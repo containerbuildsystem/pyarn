@@ -7,66 +7,57 @@ from pyarn import lexer
 @pytest.mark.parametrize(
     'data, expected_types, expected_values',
     [
-        ('foo "bar"', ['STRING', 'SPACE', 'STRING'], ['foo', ' ', 'bar']),
-        ('"foo" "bar"', ['STRING', 'SPACE', 'STRING'], ['foo', ' ', 'bar']),
-        ('"foo" "bar"', ['STRING', 'SPACE', 'STRING'], ['foo', ' ', 'bar']),
+        ('foo "bar"', ['STRING', 'STRING'], ['foo', 'bar']),
+        # ('foo  "bar"', ['STRING', 'STRING'], ['foo', 'bar']),
+        # ('foo        "bar"', ['STRING', 'STRING'], ['foo', 'bar']),
+        ('"foo" "bar"', ['STRING', 'STRING'], ['foo', 'bar']),
+        ('"foo" "bar"', ['STRING', 'STRING'], ['foo', 'bar']),
         (
             'foo:\n  bar "bar"',
-            ['STRING', 'COLON', 'NEWLINE', *['SPACE']*2, 'STRING', 'SPACE', 'STRING'],
-            ['foo', ':', '\n', *[' ']*2, 'bar', ' ', 'bar']
+            ['STRING', 'COLON', 'NEWLINE', 'INDENT', 'STRING', 'STRING'],
+            ['foo', ':', '\n', 1, 'bar', 'bar']
         ),
         (
             'foo:\n  bar:\n  foo "bar"',
-            [*['STRING', 'COLON', 'NEWLINE', *['SPACE']*2]*2, 'STRING', 'SPACE', 'STRING'],
-            ['foo', ':', '\n', *[' ']*2, 'bar', ':', '\n', *[' ']*2, 'foo', ' ', 'bar']
+            [*['STRING', 'COLON', 'NEWLINE', 'INDENT']*2, 'STRING', 'STRING'],
+            ['foo', ':', '\n', 1, 'bar', ':', '\n', 1, 'foo', 'bar']
         ),
         (
             'foo:\n  bar:\n    foo "bar"',
-            [
-                *['STRING', 'COLON', 'NEWLINE', *['SPACE']*2]*2, *['SPACE']*2, 'STRING',
-                'SPACE', 'STRING'
-            ],
-            ['foo', ':', '\n', *[' ']*2, 'bar', ':', '\n', *[' ']*4, 'foo', ' ', 'bar']
+            [*['STRING', 'COLON', 'NEWLINE', 'INDENT']*2, 'STRING', 'STRING'],
+            ['foo', ':', '\n', 1, 'bar', ':', '\n', 2, 'foo', 'bar']
         ),
         (
             'foo:\r\n  bar:\r\n    foo "bar"',
-            [
-                *['STRING', 'COLON', 'NEWLINE', *['SPACE']*2]*2, *['SPACE']*2, 'STRING',
-                'SPACE', 'STRING',
-            ],
-            [
-                'foo', ':', '\r\n', *[' ']*2, 'bar', ':', '\r\n', *[' ']*4, 'foo', ' ',
-                'bar',
-            ]
+            [*['STRING', 'COLON', 'NEWLINE', 'INDENT']*2, 'STRING', 'STRING'],
+            ['foo', ':', '\r\n', 1, 'bar', ':', '\r\n', 2, 'foo', 'bar']
         ),
         (
             'foo:\n  bar:\n    yes no\nbar:\n  yes no',
             [
-                *['STRING', 'COLON', 'NEWLINE', *['SPACE']*2]*2, *['SPACE']*2, 'STRING',
-                'SPACE', 'STRING', 'NEWLINE', 'STRING', 'COLON', 'NEWLINE',
-                *['SPACE']*2, 'STRING', 'SPACE', 'STRING',
+                *['STRING', 'COLON', 'NEWLINE', 'INDENT']*2, 'STRING', 'STRING', 'NEWLINE',
+                'STRING', 'COLON', 'NEWLINE', 'INDENT', 'STRING', 'STRING'
             ],
             [
-                'foo', ':', '\n', *[' ']*2, 'bar', ':', '\n', *[' ']*4, 'yes', ' ',
-                'no', '\n', 'bar', ':', '\n', ' ', ' ', 'yes', ' ', 'no',
+                'foo', ':', '\n', 1, 'bar', ':', '\n', 2, 'yes', 'no', '\n', 'bar', ':', '\n', 1,
+                'yes', 'no',
             ],
         ),
         (
             'foo:\r\n  bar:\r\n    yes no\r\nbar:\r\n  yes no',
             [
-                *['STRING', 'COLON', 'NEWLINE', *['SPACE']*2]*2, *['SPACE']*2, 'STRING',
-                'SPACE', 'STRING', 'NEWLINE', 'STRING', 'COLON', 'NEWLINE',
-                *['SPACE']*2, 'STRING', 'SPACE', 'STRING',
+                *['STRING', 'COLON', 'NEWLINE', 'INDENT']*2, 'STRING', 'STRING', 'NEWLINE',
+                'STRING', 'COLON', 'NEWLINE', 'INDENT', 'STRING', 'STRING',
             ],
             [
-                'foo', ':', '\r\n', *[' ']*2, 'bar', ':', '\r\n', *[' ']*4, 'yes', ' ',
-                'no', '\r\n', 'bar', ':', '\r\n', ' ', ' ', 'yes', ' ', 'no',
+                'foo', ':', '\r\n', 1, 'bar', ':', '\r\n', 2, 'yes', 'no', '\r\n', 'bar', ':',
+                '\r\n', 1, 'yes', 'no',
             ]
         ),
         (
             'foo:\n\n\n  bar "bar"\n',
-            ['STRING', 'COLON', 'NEWLINE', *['SPACE']*2, 'STRING', 'SPACE', 'STRING', 'NEWLINE'],
-            ['foo', ':', '\n\n\n', *[' ']*2, 'bar', ' ', 'bar', "\n"]
+            ['STRING', 'COLON', 'NEWLINE', 'INDENT', 'STRING', 'STRING', 'NEWLINE'],
+            ['foo', ':', '\n\n\n', 1, 'bar', 'bar', "\n"]
         ),
     ],
 )
@@ -109,5 +100,4 @@ def test_lexer_lineno():
     assert (tokens[0].value, tokens[0].lineno) == ("foo", 1)
     assert (tokens[2].value, tokens[2].lineno) == ("bar", 2)
     assert (tokens[4].value, tokens[4].lineno) == ("baz", 4)
-    assert (tokens[5].value, tokens[5].lineno) == (" ", 4)
-    assert (tokens[6].value, tokens[6].lineno) == ("end", 4)
+    assert (tokens[5].value, tokens[5].lineno) == ("end", 4)

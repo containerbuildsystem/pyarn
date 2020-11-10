@@ -4,3 +4,5 @@ MANIFEST
 .pytest_cache
 dist/
 build/
+pyarn/parser.out
+pyarn/parsetab.py

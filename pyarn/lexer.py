@@ -1,16 +1,24 @@
 tokens = (
     "STRING",
     "COMMENT",
-    "NEWLINE",
     "COMMA",
     "COLON",
-    "SPACE",
+    "INDENT",
+    "NEWLINE",
 )
 
 t_COMMENT = r"[#]+.*"
-t_COMMA = r"[ ]*,[ ]*"
-t_COLON = r"[ ]*:[ ]*"
-t_SPACE = r"[ ]"
+t_COMMA = r","
+t_COLON = r":"
+
+
+# TODO: handle final escaped quotes
+# Do this first to catch strings with spaces within
+def t_STRING(t):
+    r'"[^"\n]*"|[a-zA-Z/.-]([^\s\n,]*[^\s\n,:])?'
+    if t.value.startswith('"'):
+        t.value = t.value[1:-1]
+    return t
 
 
 def t_NEWLINE(t):
@@ -19,12 +27,15 @@ def t_NEWLINE(t):
     return t
 
 
-# TODO: handle final escaped quotes
-def t_STRING(t):
-    r'"[^"\n]*"|[a-zA-Z/.-]([^\s\n,]*[^\s\n,:])?'
-    if t.value.startswith('"'):
-        t.value = t.value[1:-1]
+def t_INDENT(t):
+    r"([ ][ ])+"
+    t.value = len(t.value)//2
     return t
+
+
+def t_spaces(t):
+    r"[ ]"
+    pass
 
 
 def t_error(t):
