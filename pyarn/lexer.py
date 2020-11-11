@@ -23,7 +23,6 @@ tokens = (
     'NEWLINE',
 )
 
-t_COMMENT = r'[#]+.*'
 t_COMMA = r','
 t_COLON = r':'
 
@@ -56,6 +55,12 @@ def t_INDENT(t):
 def t_spaces(t):
     r'[ ]'
     t.lexer.is_new_line = False
+
+
+def t_COMMENT(t):
+    r'[#]+.*'
+    t.lexer.is_new_line = False
+    return t
 
 
 def t_eof(t):
