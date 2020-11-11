@@ -25,24 +25,32 @@ from pyarn import lexer, parser
 @pytest.mark.parametrize(
     'data, expected_result',
     [
-        ('foo "bar"', {'foo': 'bar'}),
-        ('foo "bar"\n', {'foo': 'bar'}),
-        ('foo  "bar"', {'foo': 'bar'}),
-        ('foo        "bar"', {'foo': 'bar'}),
-        ('"foo" "bar"', {'foo': 'bar'}),
-        ('"foo" "bar"', {'foo': 'bar'}),
-        ('foo:\n  bar "bar"', {'foo': {'bar': 'bar'}}),
-        ('foo:\n  bar:\n    foo "bar"', {'foo': {'bar': {'foo': 'bar'}}}),
-        ('foo:\r\n  bar:\r\n    foo "bar"', {'foo': {'bar': {'foo': 'bar'}}}),
+        ('# just a comment\n', {'data': {}, 'comments': ['# just a comment']}),
+        ('# another comment', {'data': {}, 'comments': ['# another comment']}),
+        ('# two\n# comments\n', {'data': {}, 'comments': ['# two', '# comments']}),
+        ('foo "bar"', {'data': {'foo': 'bar'}, 'comments': []}),
+        ('foo "bar"\n', {'data': {'foo': 'bar'}, 'comments': []}),
+        ('# comment\nfoo "bar"\n', {'data': {'foo': 'bar'}, 'comments': ['# comment']}),
+        ('foo "bar"\n# a comment\n', {'data': {'foo': 'bar'}, 'comments': ["# a comment"]}),
+        ('foo  "bar"', {'data': {'foo': 'bar'}, 'comments': []}),
+        ('foo        "bar"', {'data': {'foo': 'bar'}, 'comments': []}),
+        ('"foo" "bar"', {'data': {'foo': 'bar'}, 'comments': []}),
+        ('"foo" "bar"', {'data': {'foo': 'bar'}, 'comments': []}),
+        ('foo:\n  bar "bar"', {'data': {'foo': {'bar': 'bar'}}, 'comments': []}),
+        ('foo:\n  bar:\n    foo "bar"', {'data': {'foo': {'bar': {'foo': 'bar'}}}, 'comments': []}),
+        (
+            'foo:\r\n  bar:\r\n    foo "bar"',
+            {'data': {'foo': {'bar': {'foo': 'bar'}}}, 'comments': []}
+        ),
         (
             'foo:\n  bar:\n    yes no\nbar:\n  yes no',
-            {'foo': {'bar': {'yes': 'no'}}, 'bar': {'yes': 'no'}},
+            {'data': {'foo': {'bar': {'yes': 'no'}}, 'bar': {'yes': 'no'}}, 'comments': []},
         ),
         (
             'foo:\r\n  bar:\r\n    yes no\r\nbar:\r\n  yes no',
-            {'foo': {'bar': {'yes': 'no'}}, 'bar': {'yes': 'no'}}
+            {'data': {'foo': {'bar': {'yes': 'no'}}, 'bar': {'yes': 'no'}}, 'comments': []}
         ),
-        ('foo:\n\n\n  bar "bar"\n', {'foo': {'bar': 'bar'}}),
+        ('foo:\n\n\n  bar "bar"\n', {'data': {'foo': {'bar': 'bar'}}, 'comments': []}),
     ],
 )
 def test_parser(data, expected_result):

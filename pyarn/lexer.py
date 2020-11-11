@@ -59,7 +59,7 @@ def t_spaces(t):
 
 
 def t_eof(t):
-    if not t.lexer.is_new_line:
+    if not getattr(t.lexer, 'is_new_line', False):
         t.lexer.input('\n')
         return t.lexer.token()
 

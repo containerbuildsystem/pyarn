@@ -19,12 +19,22 @@ from pyarn.lexer import tokens  # noqa: F401
 
 def p_blocks_single(p):
     """blocks : block"""
-    p[0] = p[1]
+    if isinstance(p[1], str):
+        # comment
+        p[0] = {'comments': [p[1]], 'data': {}}
+    else:
+        p[0] = {'comments': [], 'data': p[1]}
 
 
 def p_blocks(p):
     """blocks : blocks block"""
-    p[0] = {**p[1], **p[2]}
+    if isinstance(p[2], str):
+        # comment
+        p[1]['comments'].append(p[2])
+    else:
+        p[1]['data'].update(p[2])
+
+    p[0] = p[1]
 
 
 def p_block_title(p):
@@ -41,8 +51,7 @@ def p_block_pair(p):
 
 def p_block_comment(p):
     """block : comment"""
-    # TODO: handle comments
-    p[0] = {"pyarn-comment": p[1]}
+    p[0] = p[1]
 
 
 def p_title(p):
@@ -86,7 +95,7 @@ def p_pair_colon(p):
 # this generates a parser conflict if not properly handled inside a block
 def p_comment(p):
     """comment : COMMENT NEWLINE"""
-    p[0] = "Just a comment"
+    p[0] = p[1]
 
 
 def p_error(p):
