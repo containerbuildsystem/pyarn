@@ -8,8 +8,8 @@ from pyarn import lexer
     'data, expected_types, expected_values',
     [
         ('foo "bar"', ['STRING', 'STRING'], ['foo', 'bar']),
-        # ('foo  "bar"', ['STRING', 'STRING'], ['foo', 'bar']),
-        # ('foo        "bar"', ['STRING', 'STRING'], ['foo', 'bar']),
+        ('foo  "bar"', ['STRING', 'STRING'], ['foo', 'bar']),
+        ('foo        "bar"', ['STRING', 'STRING'], ['foo', 'bar']),
         ('"foo" "bar"', ['STRING', 'STRING'], ['foo', 'bar']),
         ('"foo" "bar"', ['STRING', 'STRING'], ['foo', 'bar']),
         (

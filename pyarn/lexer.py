@@ -18,24 +18,28 @@ def t_STRING(t):
     r'"[^"\n]*"|[a-zA-Z/.-]([^\s\n,]*[^\s\n,:])?'
     if t.value.startswith('"'):
         t.value = t.value[1:-1]
+    t.lexer.is_new_line = False
     return t
 
 
 def t_NEWLINE(t):
     r"(\n|\r\n)+"
     t.lexer.lineno += len(t.value)
+    t.lexer.is_new_line = True
     return t
 
 
 def t_INDENT(t):
     r"([ ][ ])+"
-    t.value = len(t.value)//2
-    return t
+    if t.lexer.is_new_line:
+        t.value = len(t.value)//2
+        t.lexer.is_new_line = False
+        return t
 
 
 def t_spaces(t):
     r"[ ]"
-    pass
+    t.lexer.is_new_line = False
 
 
 def t_error(t):
