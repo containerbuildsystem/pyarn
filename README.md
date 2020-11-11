@@ -1,7 +1,16 @@
 # PYarn
 
-If, for some weird reason, you need to parse or generate a Yarn's `yarn.lock`
-file using Python, you are in the right place!
+If, for some weird reason, you need to parse a Yarn's `yarn.lock` file using
+Python, you are in the right place!
+
+PYarn is currently in an early developmente stage. It will create a dict from a
+yarn.lock file, given the yarn.lock file is correct as per [its
+implementation](https://github.com/yarnpkg/yarn/blob/master/src/lockfile/parse.js).
+At this moment, there is no guarantees that PYarn will behave well (e.g., raise
+an error) in case a malformed Yarn lockfile is passed to PYarn.
+
+PYarn only supports Yarn v1 lockfiles. Parsing Yarn v2 lockfiles should be
+trivial since they are yaml files.
 
 ## Development
 
@@ -9,3 +18,5 @@ file using Python, you are in the right place!
 make develop
 make check
 ```
+
+## Usage
