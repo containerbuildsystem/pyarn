@@ -99,4 +99,4 @@ def p_comment(p):
 
 
 def p_error(p):
-    raise ValueError(f"error parsing {p}")
+    raise ValueError(f'error parsing {p}')

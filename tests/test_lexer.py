@@ -74,7 +74,7 @@ from pyarn import lexer
         (
             'foo:\n\n\n  bar "bar"\n',
             ['STRING', 'COLON', 'NEWLINE', 'INDENT', 'STRING', 'STRING', 'NEWLINE'],
-            ['foo', ':', '\n\n\n', 1, 'bar', 'bar', "\n"]
+            ['foo', ':', '\n\n\n', 1, 'bar', 'bar', '\n']
         ),
     ],
 )
@@ -118,7 +118,7 @@ def test_lexer_lineno():
     test_lexer = lex.lex(module=lexer)
     test_lexer.input(data)
     tokens = list(test_lexer)
-    assert (tokens[0].value, tokens[0].lineno) == ("foo", 1)
-    assert (tokens[2].value, tokens[2].lineno) == ("bar", 2)
-    assert (tokens[4].value, tokens[4].lineno) == ("baz", 4)
-    assert (tokens[5].value, tokens[5].lineno) == ("end", 4)
+    assert (tokens[0].value, tokens[0].lineno) == ('foo', 1)
+    assert (tokens[2].value, tokens[2].lineno) == ('bar', 2)
+    assert (tokens[4].value, tokens[4].lineno) == ('baz', 4)
+    assert (tokens[5].value, tokens[5].lineno) == ('end', 4)

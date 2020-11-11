@@ -15,17 +15,17 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 tokens = (
-    "STRING",
-    "COMMENT",
-    "COMMA",
-    "COLON",
-    "INDENT",
-    "NEWLINE",
+    'STRING',
+    'COMMENT',
+    'COMMA',
+    'COLON',
+    'INDENT',
+    'NEWLINE',
 )
 
-t_COMMENT = r"[#]+.*"
-t_COMMA = r","
-t_COLON = r":"
+t_COMMENT = r'[#]+.*'
+t_COMMA = r','
+t_COLON = r':'
 
 
 # TODO: handle final escaped quotes
@@ -39,14 +39,14 @@ def t_STRING(t):
 
 
 def t_NEWLINE(t):
-    r"(\n|\r\n)+"
+    r'(\n|\r\n)+'
     t.lexer.lineno += len(t.value)
     t.lexer.is_new_line = True
     return t
 
 
 def t_INDENT(t):
-    r"([ ][ ])+"
+    r'([ ][ ])+'
     if t.lexer.is_new_line:
         t.value = len(t.value)//2
         t.lexer.is_new_line = False
@@ -54,7 +54,7 @@ def t_INDENT(t):
 
 
 def t_spaces(t):
-    r"[ ]"
+    r'[ ]'
     t.lexer.is_new_line = False
 
 
@@ -65,4 +65,4 @@ def t_eof(t):
 
 
 def t_error(t):
-    raise ValueError(f"{t.lexer.lineno}: Invalid token {t.value}")
+    raise ValueError(f'{t.lexer.lineno}: Invalid token {t.value}')
