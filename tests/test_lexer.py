@@ -8,6 +8,7 @@ from pyarn import lexer
     'data, expected_types, expected_values',
     [
         ('foo "bar"', ['STRING', 'STRING'], ['foo', 'bar']),
+        ('foo "bar"\n', ['STRING', 'STRING', 'NEWLINE'], ['foo', 'bar', '\n']),
         ('foo  "bar"', ['STRING', 'STRING'], ['foo', 'bar']),
         ('foo        "bar"', ['STRING', 'STRING'], ['foo', 'bar']),
         ('"foo" "bar"', ['STRING', 'STRING'], ['foo', 'bar']),
@@ -65,6 +66,10 @@ def test_lexer(data, expected_types, expected_values):
     if len(expected_types) != len(expected_values):
         msg = f'Length of parameters should match for [{expected_types}, {expected_values}]'
         raise ValueError(msg)
+    # Adjust for t_eof behavior
+    if expected_types[-1] != 'NEWLINE':
+        expected_types.append('NEWLINE')
+        expected_values.append('\n')
 
     test_lexer = lex.lex(module=lexer)
     test_lexer.input(data)

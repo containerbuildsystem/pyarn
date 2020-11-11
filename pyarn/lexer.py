@@ -42,5 +42,11 @@ def t_spaces(t):
     t.lexer.is_new_line = False
 
 
+def t_eof(t):
+    if not t.lexer.is_new_line:
+        t.lexer.input('\n')
+        return t.lexer.token()
+
+
 def t_error(t):
     raise ValueError(f"{t.lexer.lineno}: Invalid token {t.value}")
