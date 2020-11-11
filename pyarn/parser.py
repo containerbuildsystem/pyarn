@@ -12,10 +12,15 @@ def p_blocks(p):
 
 def p_block(p):
     """block : title members
+             | pair
              | comment"""
     if len(p) == 2:
-        # TODO: handle comments
-        p[0] = {"pyarn-comment": p[1]}
+        if isinstance(p[1], dict):
+            # is pair
+            p[0] = p[1]
+        else:
+            # TODO: handle comments
+            p[0] = {"pyarn-comment": p[1]}
     else:
         # TODO: do we want to separate titles like "foo, bar"?
         # have in mind they may also be like "foo || bar, biz"
@@ -67,4 +72,4 @@ def p_comment(p):
 
 
 def p_error(p):
-    raise ValueError(f"error parsing {p.type} at line {p.lineno}:\n\tvalue: [{p.value}]")
+    raise ValueError(f"error parsing {p}")
