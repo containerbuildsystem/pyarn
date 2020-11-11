@@ -20,3 +20,17 @@ make check
 ```
 
 ## Usage
+
+The following prints all the content in the `yarn.lock` file:
+
+```
+from pyarn import lexer, parser, lockfile
+
+my_lockfile = lockfile.Lockfile.from_file(FILE_NAME)
+print(my_lockfile.data)
+# or
+my_lockfile.to_json()
+```
+
+`my_lockfile.data` is a `dict` where the top level keys are the top level entries
+(i.e., the package names) for the `yarn.lock` file entries.
