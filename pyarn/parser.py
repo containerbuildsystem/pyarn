@@ -38,7 +38,7 @@ def p_blocks(p):
 
 
 def p_block_title(p):
-    """block : title members"""
+    """block : title members DEDENT"""
     # TODO: do we want to separate titles like "foo, bar"?
     # have in mind they may also be like "foo || bar, biz"
     p[0] = {p[1]: p[2]}
@@ -55,8 +55,8 @@ def p_block_comment(p):
 
 
 def p_title(p):
-    """title : STRING COLON NEWLINE INDENT
-             | list COLON NEWLINE INDENT"""
+    """title : STRING COLON INDENT
+             | list COLON INDENT"""
     p[0] = p[1]
 
 
@@ -72,29 +72,34 @@ def p_members(p):
 
 
 def p_members_multiple_pairs(p):
-    """members : pair INDENT members"""
-    p[0] = {**p[1], **p[3]}
+    """members : pair members"""
+    p[0] = {**p[1], **p[2]}
 
 
 def p_members_nested_title(p):
-    """members : title members"""
+    """members : title members DEDENT"""
     p[0] = {p[1]: p[2]}
 
 
+def p_members_nested_title_memb(p):
+    """members : title members DEDENT members"""
+    p[0] = {**p[4], p[1]: p[2]}
+
+
 def p_pair(p):
-    """pair : STRING STRING NEWLINE"""
+    """pair : STRING STRING"""
     p[0] = {p[1]: p[2]}
 
 
 def p_pair_colon(p):
-    """pair : STRING COLON STRING NEWLINE"""
+    """pair : STRING COLON STRING"""
     p[0] = {p[1]: p[3]}
 
 
 # TODO: handle indented comments
 # this generates a parser conflict if not properly handled inside a block
 def p_comment(p):
-    """comment : COMMENT NEWLINE"""
+    """comment : COMMENT"""
     p[0] = p[1]
 
 

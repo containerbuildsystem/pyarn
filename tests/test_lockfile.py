@@ -58,11 +58,11 @@ def test_from_file():
 
 
 def test_v1():
-    pytest.skip("Not implemented")
+    pytest.skip('Not implemented')
 
 
 def test_vx():
-    pytest.skip("Not implemented")
+    pytest.skip('Not implemented')
 
 
 @pytest.mark.parametrize('data', [('# comment\n'), ('foo "bar"'), ('foo "bar"\n# comment\n')])
@@ -72,4 +72,4 @@ def test_unknown_version(data):
 
 
 def test_to_json():
-    pytest.skip("Not implemented")
+    pytest.skip('Not implemented')

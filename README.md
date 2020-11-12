@@ -24,7 +24,7 @@ make check
 The following prints all the content in the `yarn.lock` file:
 
 ```
-from pyarn import lexer, parser, lockfile
+from pyarn import lockfile
 
 my_lockfile = lockfile.Lockfile.from_file(FILE_NAME)
 print(my_lockfile.data)

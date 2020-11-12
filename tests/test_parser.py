@@ -20,6 +20,7 @@ from ply import lex, yacc
 import pytest
 
 from pyarn import lexer, parser
+from pyarn.indent_lexer import Wrapper
 
 
 @pytest.mark.parametrize(
@@ -51,17 +52,34 @@ from pyarn import lexer, parser
             {'data': {'foo': {'bar': {'yes': 'no'}}, 'bar': {'yes': 'no'}}, 'comments': []}
         ),
         ('foo:\n\n\n  bar "bar"\n', {'data': {'foo': {'bar': 'bar'}}, 'comments': []}),
+        # test nested structures
+        ('a:\n  b: \n    c d', {'data': {'a': {'b': {'c': 'd'}}}, 'comments': []}),
+        ('a:\n  b: \n    c d\n  e f', {'data': {'a': {'b': {'c': 'd'}, 'e': 'f'}}, 'comments': []}),
     ],
 )
 def test_parser(data, expected_result):
-    lex.lex(module=lexer)
+    lex_wrapper = Wrapper(lex.lex(module=lexer))
     test_parser = yacc.yacc(module=parser)
-    result = test_parser.parse(data, debug=False)
+    result = test_parser.parse(data, lexer=lex_wrapper)
     assert result == expected_result
 
 
+@pytest.mark.parametrize(
+    'data',
+    [
+        # wrong indentation
+        ('foo:\n  bar:\n  foo "bar"'),
+    ],
+)
+def test_parser_error(data):
+    lex_wrapper = Wrapper(lex.lex(module=lexer))
+    test_parser = yacc.yacc(module=parser)
+    with pytest.raises(ValueError):
+        test_parser.parse(data, lexer=lex_wrapper)
+
+
 def test_regressions():
-    lex.lex(module=lexer)
+    lex_wrapper = Wrapper(lex.lex(module=lexer))
     test_parser = yacc.yacc(module=parser)
 
     tests_dir = os.path.dirname(__file__)
@@ -74,4 +92,4 @@ def test_regressions():
     for test_file in test_files:
         with open(test_file, 'r') as tf:
             data = tf.read()
-        test_parser.parse(data, debug=False)
+        test_parser.parse(data, lexer=lex_wrapper)

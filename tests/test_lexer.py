@@ -24,57 +24,57 @@ from pyarn import lexer
     'data, expected_types, expected_values',
     [
         ('foo "bar"', ['STRING', 'STRING'], ['foo', 'bar']),
-        ('foo "bar"\n', ['STRING', 'STRING', 'NEWLINE'], ['foo', 'bar', '\n']),
+        ('foo "bar"\n', ['STRING', 'STRING'], ['foo', 'bar']),
         ('foo  "bar"', ['STRING', 'STRING'], ['foo', 'bar']),
         ('foo        "bar"', ['STRING', 'STRING'], ['foo', 'bar']),
         ('"foo" "bar"', ['STRING', 'STRING'], ['foo', 'bar']),
         ('"foo" "bar"', ['STRING', 'STRING'], ['foo', 'bar']),
         (
             'foo:\n  bar "bar"',
-            ['STRING', 'COLON', 'NEWLINE', 'INDENT', 'STRING', 'STRING'],
-            ['foo', ':', '\n', 1, 'bar', 'bar']
+            ['STRING', 'COLON', 'INDENT', 'STRING', 'STRING', 'DEDENT'],
+            ['foo', ':', 1, 'bar', 'bar', 1]
         ),
         (
             'foo:\n  bar:\n  foo "bar"',
-            [*['STRING', 'COLON', 'NEWLINE', 'INDENT']*2, 'STRING', 'STRING'],
-            ['foo', ':', '\n', 1, 'bar', ':', '\n', 1, 'foo', 'bar']
+            ['STRING', 'COLON', 'INDENT', 'STRING', 'COLON', 'STRING', 'STRING', 'DEDENT'],
+            ['foo', ':', 1, 'bar', ':', 'foo', 'bar', 1]
         ),
         (
             'foo:\n  bar:\n    foo "bar"',
-            [*['STRING', 'COLON', 'NEWLINE', 'INDENT']*2, 'STRING', 'STRING'],
-            ['foo', ':', '\n', 1, 'bar', ':', '\n', 2, 'foo', 'bar']
+            [*['STRING', 'COLON', 'INDENT']*2, 'STRING', 'STRING', 'DEDENT'],
+            ['foo', ':', 1, 'bar', ':', 2, 'foo', 'bar', 2]
         ),
         (
             'foo:\r\n  bar:\r\n    foo "bar"',
-            [*['STRING', 'COLON', 'NEWLINE', 'INDENT']*2, 'STRING', 'STRING'],
-            ['foo', ':', '\r\n', 1, 'bar', ':', '\r\n', 2, 'foo', 'bar']
+            [*['STRING', 'COLON', 'INDENT']*2, 'STRING', 'STRING', 'DEDENT'],
+            ['foo', ':', 1, 'bar', ':', 2, 'foo', 'bar', 2]
         ),
         (
             'foo:\n  bar:\n    yes no\nbar:\n  yes no',
             [
-                *['STRING', 'COLON', 'NEWLINE', 'INDENT']*2, 'STRING', 'STRING', 'NEWLINE',
-                'STRING', 'COLON', 'NEWLINE', 'INDENT', 'STRING', 'STRING'
+                *['STRING', 'COLON', 'INDENT']*2, 'STRING', 'STRING', 'DEDENT',
+                'STRING', 'COLON', 'INDENT', 'STRING', 'STRING', 'DEDENT'
             ],
             [
-                'foo', ':', '\n', 1, 'bar', ':', '\n', 2, 'yes', 'no', '\n', 'bar', ':', '\n', 1,
-                'yes', 'no',
+                'foo', ':', 1, 'bar', ':', 2, 'yes', 'no', 2, 'bar', ':',  1,
+                'yes', 'no', 1
             ],
         ),
         (
             'foo:\r\n  bar:\r\n    yes no\r\nbar:\r\n  yes no',
             [
-                *['STRING', 'COLON', 'NEWLINE', 'INDENT']*2, 'STRING', 'STRING', 'NEWLINE',
-                'STRING', 'COLON', 'NEWLINE', 'INDENT', 'STRING', 'STRING',
+                *['STRING', 'COLON', 'INDENT']*2, 'STRING', 'STRING', 'DEDENT',
+                'STRING', 'COLON', 'INDENT', 'STRING', 'STRING', 'DEDENT'
             ],
             [
-                'foo', ':', '\r\n', 1, 'bar', ':', '\r\n', 2, 'yes', 'no', '\r\n', 'bar', ':',
-                '\r\n', 1, 'yes', 'no',
-            ]
+                'foo', ':', 1, 'bar', ':', 2, 'yes', 'no', 2, 'bar', ':',  1,
+                'yes', 'no', 1
+            ],
         ),
         (
             'foo:\n\n\n  bar "bar"\n',
-            ['STRING', 'COLON', 'NEWLINE', 'INDENT', 'STRING', 'STRING', 'NEWLINE'],
-            ['foo', ':', '\n\n\n', 1, 'bar', 'bar', '\n']
+            ['STRING', 'COLON', 'INDENT', 'STRING', 'STRING', 'DEDENT'],
+            ['foo', ':', 1, 'bar', 'bar', 1]
         ),
     ],
 )
@@ -82,10 +82,6 @@ def test_lexer(data, expected_types, expected_values):
     if len(expected_types) != len(expected_values):
         msg = f'Length of parameters should match for [{expected_types}, {expected_values}]'
         raise ValueError(msg)
-    # Adjust for t_eof behavior
-    if expected_types[-1] != 'NEWLINE':
-        expected_types.append('NEWLINE')
-        expected_values.append('\n')
 
     test_lexer = lex.lex(module=lexer)
     test_lexer.input(data)
@@ -119,6 +115,6 @@ def test_lexer_lineno():
     test_lexer.input(data)
     tokens = list(test_lexer)
     assert (tokens[0].value, tokens[0].lineno) == ('foo', 1)
-    assert (tokens[2].value, tokens[2].lineno) == ('bar', 2)
-    assert (tokens[4].value, tokens[4].lineno) == ('baz', 4)
-    assert (tokens[5].value, tokens[5].lineno) == ('end', 4)
+    assert (tokens[1].value, tokens[1].lineno) == ('bar', 2)
+    assert (tokens[2].value, tokens[2].lineno) == ('baz', 4)
+    assert (tokens[3].value, tokens[3].lineno) == ('end', 4)

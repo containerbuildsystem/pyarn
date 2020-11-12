@@ -20,7 +20,7 @@ tokens = (
     'COMMA',
     'COLON',
     'INDENT',
-    'NEWLINE',
+    'DEDENT',
 )
 
 t_COMMA = r','
@@ -33,38 +33,44 @@ def t_STRING(t):
     r'"[^"\n]*"|[a-zA-Z/.-]([^\s\n,]*[^\s\n,:])?'
     if t.value.startswith('"'):
         t.value = t.value[1:-1]
-    t.lexer.is_new_line = False
-    return t
-
-
-def t_NEWLINE(t):
-    r'(\n|\r\n)+'
-    t.lexer.lineno += len(t.value)
-    t.lexer.is_new_line = True
     return t
 
 
 def t_INDENT(t):
-    r'([ ][ ])+'
-    if t.lexer.is_new_line:
-        t.value = len(t.value)//2
-        t.lexer.is_new_line = False
+    r'(\n|\r\n)(?P<indent>([ ][ ])+)?'
+    t.lexer.lineno += 1
+    t.lexer.indent_lvl = getattr(t.lexer, 'indent_lvl', 0)
+    raw_indent = t.lexer.lexmatch.groupdict().get('indent') or ''
+    indents = len(raw_indent)//2
+    if indents > t.lexer.indent_lvl:
+        if indents != t.lexer.indent_lvl + 1:
+            # no one line multiple indentation allowed
+            raise SyntaxError
+        t.lexer.indent_lvl = indents
+        t.value = indents
+        t.lexer.is_indented = True
+        return t
+
+    elif indents < t.lexer.indent_lvl:
+        t.value = t.lexer.indent_lvl - indents
+        t.lexer.indent_lvl = indents
+        t.type = 'DEDENT'
+        if t.lexer.indent_lvl == 0:
+            t.lexer.is_indented = False
         return t
 
 
 def t_spaces(t):
     r'[ ]'
-    t.lexer.is_new_line = False
 
 
 def t_COMMENT(t):
     r'[#]+.*'
-    t.lexer.is_new_line = False
     return t
 
 
 def t_eof(t):
-    if not getattr(t.lexer, 'is_new_line', False):
+    if getattr(t.lexer, 'is_indented', False):
         t.lexer.input('\n')
         return t.lexer.token()
 

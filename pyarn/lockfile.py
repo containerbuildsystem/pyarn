@@ -20,6 +20,7 @@ import json
 
 from ply import lex, yacc
 from pyarn import lexer, parser
+from pyarn.indent_lexer import Wrapper
 
 
 class Lockfile():
@@ -43,9 +44,9 @@ class Lockfile():
 
     @classmethod
     def from_str(cls, lockfile_str):
-        lex.lex(module=lexer)
+        pyarn_lexer = Wrapper(lex.lex(module=lexer))
         lockfile_parser = yacc.yacc(module=parser)
-        parsed_data = lockfile_parser.parse(lockfile_str)
+        parsed_data = lockfile_parser.parse(lockfile_str, lexer=pyarn_lexer)
         version = 'unknown'
         for comment in parsed_data['comments']:
             declared_version = re.match(r'^# yarn lockfile v(\d+)$', comment)
