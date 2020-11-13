@@ -15,7 +15,7 @@ trivial since they are yaml files.
 ## Development
 
 ```
-make develop
+make devel
 make check
 ```
 
