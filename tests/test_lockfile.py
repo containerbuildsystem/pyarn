@@ -14,6 +14,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
+import json
 import os
 
 import pytest
@@ -78,5 +79,15 @@ def test_unknown_version(data):
     assert lock.version == 'unknown'
 
 
-def test_to_json():
-    pytest.skip('Not implemented')
+@pytest.mark.parametrize(
+    'data, expected_data',
+    [
+        ('# comment\n', {}),
+        ('foo "bar"', {'foo': 'bar'}),
+        ('foo "bar"\n# comment\n', {'foo': 'bar'}),
+        ('foo "bar"\n# comment', {'foo': 'bar'}),
+    ]
+)
+def test_to_json(data, expected_data):
+    lock = lockfile.Lockfile.from_str(data)
+    assert lock.to_json() == json.dumps(expected_data, sort_keys=True, indent=4)
