@@ -58,11 +58,18 @@ def test_from_file():
 
 
 def test_v1():
-    pytest.skip('Not implemented')
+    lock = lockfile.Lockfile.from_str('# yarn lockfile v1\n')
+    assert lock.version == '1'
 
 
 def test_vx():
-    pytest.skip('Not implemented')
+    with pytest.raises(ValueError):
+        lockfile.Lockfile.from_str('# yarn lockfile v2\n')
+
+
+def test_no_version(caplog):
+    lockfile.Lockfile.from_str('# comment\n')
+    assert 'Unknown Yarn version. Was this lockfile manually edited?' in caplog.text
 
 
 @pytest.mark.parametrize('data', [('# comment\n'), ('foo "bar"'), ('foo "bar"\n# comment\n')])

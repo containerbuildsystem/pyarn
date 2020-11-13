@@ -14,6 +14,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
+import logging
 import re
 
 import json
@@ -23,13 +24,15 @@ from pyarn import lexer, parser
 from pyarn.indent_lexer import Wrapper
 
 
+logger = logging.getLogger(__name__)
+
+
 class Lockfile():
     def __init__(self, version, data):
         self.version = version
         self.data = data
         if self.version == 'unknown':
-            # TODO: log warning
-            pass
+            logger.warning('Unknown Yarn version. Was this lockfile manually edited?')
         elif self.version != '1':
             raise ValueError(f'Unsupported yarn.lockfile version: {version}')
 
