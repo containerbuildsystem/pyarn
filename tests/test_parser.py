@@ -55,6 +55,8 @@ from pyarn.indent_lexer import Wrapper
         # test nested structures
         ('a:\n  b: \n    c d', {'data': {'a': {'b': {'c': 'd'}}}, 'comments': []}),
         ('a:\n  b: \n    c d\n  e f', {'data': {'a': {'b': {'c': 'd'}, 'e': 'f'}}, 'comments': []}),
+        # numbers
+        ('foo 123\n', {'data': {'foo': 123}, 'comments': []}),
     ],
 )
 def test_parser(data, expected_result):
