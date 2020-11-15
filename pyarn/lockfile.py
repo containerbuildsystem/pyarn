@@ -26,6 +26,32 @@ from pyarn.indent_lexer import Wrapper
 logger = logging.getLogger(__name__)
 
 
+class Package():
+    def __init__(self, name, version, url=None, checksum=None, relpath=None):
+        if not name:
+            raise ValueError('Package name was not provided')
+
+        if not version:
+            raise ValueError('Package version was not provided')
+
+        self.name = name
+        self.version = version
+        self.url = url
+        self.checksum = checksum
+        self.relpath = relpath
+
+    @classmethod
+    def from_dict(cls, raw_name, data):
+        raw_matcher = re.match(r'(?P<name>@?[^@]+)(?:@file:(?P<path>.+))?', raw_name)
+        name = raw_matcher.groupdict()['name']
+        path = raw_matcher.groupdict()['path']
+        pkg = cls(
+            name, data.get('version'), url=data.get('resolved'),
+            checksum=data.get('integrity'), relpath=path
+        )
+        return pkg
+
+
 class Lockfile():
     def __init__(self, version, data):
         self.version = version
@@ -37,6 +63,13 @@ class Lockfile():
 
     def to_json(self):
         return json.dumps(self.data, sort_keys=True, indent=4)
+
+    def packages(self):
+        packages = []
+        for name, pkg_data in self.data.items():
+            pkg = Package.from_dict(name, pkg_data)
+            packages.append(pkg)
+        return packages
 
     @classmethod
     def from_file(cls, path):
