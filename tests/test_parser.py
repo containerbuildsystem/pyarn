@@ -57,6 +57,10 @@ from pyarn.lexer_wrapper import Wrapper
         ('a:\n  b: \n    c d\n  e f', {'data': {'a': {'b': {'c': 'd'}, 'e': 'f'}}, 'comments': []}),
         # numbers
         ('foo 123\n', {'data': {'foo': 123}, 'comments': []}),
+        ('foo true\n', {'data': {'foo': True}, 'comments': []}),
+        ('foo false\n', {'data': {'foo': False}, 'comments': []}),
+        ('foo "true"\n', {'data': {'foo': 'true'}, 'comments': []}),
+        ('foo "false"\n', {'data': {'foo': 'false'}, 'comments': []}),
     ],
 )
 def test_parser(data, expected_result):

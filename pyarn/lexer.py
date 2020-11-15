@@ -22,6 +22,7 @@ tokens = (
     'INDENT',
     'DEDENT',
     'NUMBER',
+    'BOOLEAN',
 )
 
 t_COMMA = r','
@@ -40,6 +41,12 @@ def t_STRING(t):
     r'"[^"\n]*"|[a-zA-Z/.-]([^\s\n,]*[^\s\n,:])?'
     if t.value.startswith('"'):
         t.value = t.value[1:-1]
+    elif t.value == 'true':
+        t.value = True
+        t.type = 'BOOLEAN'
+    elif t.value == 'false':
+        t.value = False
+        t.type = 'BOOLEAN'
     return t
 
 
