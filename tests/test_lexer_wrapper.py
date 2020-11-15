@@ -18,7 +18,7 @@ from ply import lex
 import pytest
 
 from pyarn import lexer
-from pyarn.indent_lexer import Wrapper
+from pyarn.lexer_wrapper import Wrapper
 
 
 @pytest.mark.parametrize(

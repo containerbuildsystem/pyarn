@@ -20,7 +20,7 @@ import re
 
 from ply import lex, yacc
 from pyarn import lexer, parser
-from pyarn.indent_lexer import Wrapper
+from pyarn.lexer_wrapper import Wrapper
 
 
 logger = logging.getLogger(__name__)

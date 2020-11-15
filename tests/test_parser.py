@@ -20,7 +20,7 @@ from ply import lex, yacc
 import pytest
 
 from pyarn import lexer, parser
-from pyarn.indent_lexer import Wrapper
+from pyarn.lexer_wrapper import Wrapper
 
 
 @pytest.mark.parametrize(
