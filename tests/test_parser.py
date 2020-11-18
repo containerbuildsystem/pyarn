@@ -20,7 +20,7 @@ from ply import lex, yacc
 import pytest
 
 from pyarn import lexer, parser
-from pyarn.indent_lexer import Wrapper
+from pyarn.lexer_wrapper import Wrapper
 
 
 @pytest.mark.parametrize(
@@ -55,6 +55,12 @@ from pyarn.indent_lexer import Wrapper
         # test nested structures
         ('a:\n  b: \n    c d', {'data': {'a': {'b': {'c': 'd'}}}, 'comments': []}),
         ('a:\n  b: \n    c d\n  e f', {'data': {'a': {'b': {'c': 'd'}, 'e': 'f'}}, 'comments': []}),
+        # numbers
+        ('foo 123\n', {'data': {'foo': 123}, 'comments': []}),
+        ('foo true\n', {'data': {'foo': True}, 'comments': []}),
+        ('foo false\n', {'data': {'foo': False}, 'comments': []}),
+        ('foo "true"\n', {'data': {'foo': 'true'}, 'comments': []}),
+        ('foo "false"\n', {'data': {'foo': 'false'}, 'comments': []}),
     ],
 )
 def test_parser(data, expected_result):

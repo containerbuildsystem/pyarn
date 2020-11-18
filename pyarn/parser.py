@@ -96,6 +96,26 @@ def p_pair_colon(p):
     p[0] = {p[1]: p[3]}
 
 
+def p_pair_number(p):
+    """pair : STRING NUMBER"""
+    p[0] = {p[1]: p[2]}
+
+
+def p_pair_colon_number(p):
+    """pair : STRING COLON NUMBER"""
+    p[0] = {p[1]: p[3]}
+
+
+def p_pair_boolean(p):
+    """pair : STRING BOOLEAN"""
+    p[0] = {p[1]: p[2]}
+
+
+def p_pair_colon_boolean(p):
+    """pair : STRING COLON BOOLEAN"""
+    p[0] = {p[1]: p[3]}
+
+
 # TODO: handle indented comments
 # this generates a parser conflict if not properly handled inside a block
 def p_comment(p):
