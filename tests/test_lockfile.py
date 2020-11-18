@@ -91,3 +91,77 @@ def test_unknown_version(data):
 def test_to_json(data, expected_data):
     lock = lockfile.Lockfile.from_str(data)
     assert lock.to_json() == json.dumps(expected_data, sort_keys=True, indent=4)
+
+
+def test_packages():
+    data = 'breakfast@^1.1.1:\n  eggs bacon\n  version "2.0.0"'
+    lock = lockfile.Lockfile.from_str(data)
+    packages = lock.packages()
+    assert len(packages) == 1
+    assert packages[0].name == 'breakfast'
+    assert packages[0].version == '2.0.0'
+    assert packages[0].checksum is None
+    assert packages[0].url is None
+    assert packages[0].relpath is None
+
+
+def test_packages_no_version():
+    data = 'breakfast@^1.1.1:\n  eggs bacon'
+    lock = lockfile.Lockfile.from_str(data)
+    with pytest.raises(ValueError, match='Package version was not provided'):
+        lock.packages()
+
+
+def test_packages_no_name():
+    with pytest.raises(ValueError, match='Package name was not provided'):
+        lockfile.Package(None, '1.0.0')
+
+
+def test_packages_url():
+    url = 'https://example.com/breakfast/1.1.1.tar.gz'
+    data = f'breakfast@^1.1.1:\n  version "2.0.0"\n  resolved "{url}"'
+    lock = lockfile.Lockfile.from_str(data)
+    packages = lock.packages()
+    assert len(packages) == 1
+    assert packages[0].name == 'breakfast'
+    assert packages[0].version == '2.0.0'
+    assert packages[0].checksum is None
+    assert packages[0].url == url
+    assert packages[0].relpath is None
+
+
+def test_packages_checksum():
+    url = 'https://example.com/breakfast/1.1.1.tar.gz'
+    data = f'breakfast@^1.1.1:\n  version "2.0.0"\n  resolved "{url}"\n  integrity someHash'
+    lock = lockfile.Lockfile.from_str(data)
+    packages = lock.packages()
+    assert len(packages) == 1
+    assert packages[0].name == 'breakfast'
+    assert packages[0].version == '2.0.0'
+    assert packages[0].checksum == 'someHash'
+    assert packages[0].url == url
+    assert packages[0].relpath is None
+
+
+def test_relpath():
+    data = 'breakfast@file:some/relative/path:\n  version "0.0.0"'
+    lock = lockfile.Lockfile.from_str(data)
+    packages = lock.packages()
+    assert len(packages) == 1
+    assert packages[0].name == 'breakfast'
+    assert packages[0].version == '0.0.0'
+    assert packages[0].checksum is None
+    assert packages[0].url is None
+    assert packages[0].relpath == 'some/relative/path'
+
+
+def test_package_with_comma():
+    data = 'eggs@^1.1.1, eggs@^1.1.2, eggs@^1.1.3:\n  version "1.1.7"'
+    lock = lockfile.Lockfile.from_str(data)
+    packages = lock.packages()
+    assert len(packages) == 1
+    assert packages[0].name == 'eggs'
+    assert packages[0].version == '1.1.7'
+    assert packages[0].checksum is None
+    assert packages[0].url is None
+    assert packages[0].relpath is None
