@@ -16,6 +16,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import json
 import os
+from textwrap import dedent
 
 import pytest
 
@@ -165,3 +166,59 @@ def test_package_with_comma():
     assert packages[0].checksum is None
     assert packages[0].url is None
     assert packages[0].relpath is None
+
+
+DATA_TO_DUMP = {
+    'foo@^1.0.0': {
+        'version': '1.0.0',
+        'resolved': 'https://registry.yarnpkg.com/foo/-/foo-1.0.0.tgz',
+        'dependencies': {
+            'bar': '^2.0.0'
+        },
+        'some number': 1,
+    },
+    'bar@^2.0.0': {
+        'version': '2.0.0',
+        'resolved': 'https://registry.yarnpkg.com/bar/-/bar-2.0.0.tgz',
+        'some boolean': True,
+    }
+}
+
+EXPECTED_CONTENT = dedent(
+    """\
+    # yarn lockfile v1
+
+    foo@^1.0.0:
+      version "1.0.0"
+      resolved "https://registry.yarnpkg.com/foo/-/foo-1.0.0.tgz"
+      dependencies:
+        bar "^2.0.0"
+      "some number" 1
+
+    bar@^2.0.0:
+      version "2.0.0"
+      resolved "https://registry.yarnpkg.com/bar/-/bar-2.0.0.tgz"
+      "some boolean" true
+    """
+)
+
+
+def test_to_file(tmp_path):
+    output_path = tmp_path / "yarn.lock"
+    lockfile.Lockfile('1', DATA_TO_DUMP).to_file(output_path)
+    assert output_path.read_text() == EXPECTED_CONTENT
+
+
+def test_to_str():
+    content = lockfile.Lockfile('1', DATA_TO_DUMP).to_str()
+    assert content == EXPECTED_CONTENT
+
+
+def test_roundtrip(all_test_files, tmp_path):
+    for test_file in all_test_files:
+        out_file = tmp_path / os.path.basename(test_file)
+        # Check that load -> dump -> load produces expected results
+        original = lockfile.Lockfile.from_file(test_file)
+        original.to_file(out_file)
+        generated = lockfile.Lockfile.from_file(out_file)
+        assert original.data == generated.data

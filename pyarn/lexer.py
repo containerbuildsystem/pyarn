@@ -35,6 +35,11 @@ def t_NUMBER(t):
     return t
 
 
+# Unquoted string regex (see t_STRING)
+# Docstrings cannot use string interpolation, this value is used by other modules
+UNQUOTED_STRING = r'[a-zA-Z/.-]([^\s\n,]*[^\s\n,:])?'
+
+
 # TODO: handle final escaped quotes
 # Do this first to catch strings with spaces within
 def t_STRING(t):
