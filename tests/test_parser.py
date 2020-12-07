@@ -14,8 +14,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-import os
-
 from ply import lex, yacc
 import pytest
 
@@ -84,18 +82,11 @@ def test_parser_error(data):
         test_parser.parse(data, lexer=lex_wrapper)
 
 
-def test_regressions():
+def test_regressions(all_test_files):
     lex_wrapper = Wrapper(lex.lex(module=lexer))
     test_parser = yacc.yacc(module=parser)
 
-    tests_dir = os.path.dirname(__file__)
-    test_data_dir = os.path.join(tests_dir, 'data')
-    test_data = os.listdir(test_data_dir)
-    test_files = [
-        os.path.join(test_data_dir, f) for f in test_data
-        if os.path.isfile(os.path.join(test_data_dir, f))
-    ]
-    for test_file in test_files:
+    for test_file in all_test_files:
         with open(test_file, 'r') as tf:
             data = tf.read()
         test_parser.parse(data, lexer=lex_wrapper)

@@ -14,6 +14,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
+import io
 import json
 import logging
 import re
@@ -24,6 +25,10 @@ from pyarn.lexer_wrapper import Wrapper
 
 
 logger = logging.getLogger(__name__)
+
+UNQUOTED_STRING_RE = re.compile(lexer.UNQUOTED_STRING)
+
+V1_VERSION_COMMENT = "# yarn lockfile v1"
 
 
 class Package():
@@ -84,7 +89,54 @@ class Lockfile():
         parsed_data = lockfile_parser.parse(lockfile_str, lexer=pyarn_lexer)
         version = 'unknown'
         for comment in parsed_data['comments']:
-            declared_version = re.match(r'^# yarn lockfile v(\d+)$', comment)
-            if declared_version:
-                version = declared_version.group(1)
+            if comment == V1_VERSION_COMMENT:
+                version = '1'
         return cls(version, parsed_data['data'])
+
+    def to_file(self, path):
+        with open(path, 'w') as lockfile:
+            self._dump(lockfile)
+
+    def to_str(self):
+        buffer = io.StringIO()
+        self._dump(buffer)
+        return buffer.getvalue()
+
+    def _dump(self, outfile):
+        # Does not preserve any comments, but this one is required
+        outfile.write(V1_VERSION_COMMENT)
+        outfile.write('\n')
+        for key, val in self.data.items():
+            # Separate top-level keyvals by newline
+            outfile.write('\n')
+            _dump_keyval(key, val, outfile, 0)
+
+
+def _dump_keyval(key, value, outfile, indent_level):
+    outfile.write(' ' * indent_level * 2)
+    if _needs_quoting(key):
+        # TODO: use json.dump to quote the key instead
+        #   (the lexer would also have to interpret strings using json.load)
+        outfile.write(f'"{key}"')
+    else:
+        outfile.write(key)
+
+    if isinstance(value, dict):
+        outfile.write(':\n')
+        for k, v in value.items():
+            _dump_keyval(k, v, outfile, indent_level + 1)
+        # No newline here, _dump_keyval has already added one (recursion always ends
+        # with a string, integer or boolean - the grammar does not allow empty dicts)
+    else:
+        outfile.write(' ')
+        if isinstance(value, str):
+            # Always quote string values
+            # TODO: see quoting keys
+            outfile.write(f'"{value}"')
+        else:
+            json.dump(value, outfile)
+        outfile.write('\n')
+
+
+def _needs_quoting(s):
+    return UNQUOTED_STRING_RE.fullmatch(s) is None
