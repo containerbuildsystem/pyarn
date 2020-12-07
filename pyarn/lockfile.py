@@ -28,6 +28,8 @@ logger = logging.getLogger(__name__)
 
 UNQUOTED_STRING_RE = re.compile(lexer.UNQUOTED_STRING)
 
+V1_VERSION_COMMENT = "# yarn lockfile v1"
+
 
 class Package():
     def __init__(self, name, version, url=None, checksum=None, relpath=None):
@@ -87,9 +89,8 @@ class Lockfile():
         parsed_data = lockfile_parser.parse(lockfile_str, lexer=pyarn_lexer)
         version = 'unknown'
         for comment in parsed_data['comments']:
-            declared_version = re.match(r'^# yarn lockfile v(\d+)$', comment)
-            if declared_version:
-                version = declared_version.group(1)
+            if comment == V1_VERSION_COMMENT:
+                version = '1'
         return cls(version, parsed_data['data'])
 
     def to_file(self, path):
@@ -103,7 +104,8 @@ class Lockfile():
 
     def _dump(self, outfile):
         # Does not preserve any comments, but this one is required
-        outfile.write('# yarn lockfile v1\n')
+        outfile.write(V1_VERSION_COMMENT)
+        outfile.write('\n')
         for key, val in self.data.items():
             # Separate top-level keyvals by newline
             outfile.write('\n')

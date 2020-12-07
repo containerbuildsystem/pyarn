@@ -64,11 +64,6 @@ def test_v1():
     assert lock.version == '1'
 
 
-def test_vx():
-    with pytest.raises(ValueError):
-        lockfile.Lockfile.from_str('# yarn lockfile v2\n')
-
-
 def test_no_version(caplog):
     lockfile.Lockfile.from_str('# comment\n')
     assert 'Unknown Yarn version. Was this lockfile manually edited?' in caplog.text
@@ -78,6 +73,12 @@ def test_no_version(caplog):
 def test_unknown_version(data):
     lock = lockfile.Lockfile.from_str(data)
     assert lock.version == 'unknown'
+
+
+def test_invalid_version():
+    with pytest.raises(ValueError, match="Unsupported yarn.lockfile version: 2"):
+        # Currently, the only way to specify an invalid version is by initializing directly
+        lockfile.Lockfile('2', {})
 
 
 @pytest.mark.parametrize(
