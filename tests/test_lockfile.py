@@ -146,7 +146,7 @@ def test_packages_checksum():
 
 
 def test_relpath():
-    data = 'breakfast@file:some/relative/path:\n  version "0.0.0"'
+    data = '"breakfast@file:some/relative/path":\n  version "0.0.0"'
     lock = lockfile.Lockfile.from_str(data)
     packages = lock.packages()
     assert len(packages) == 1
@@ -182,7 +182,11 @@ DATA_TO_DUMP = {
         'version': '2.0.0',
         'resolved': 'https://registry.yarnpkg.com/bar/-/bar-2.0.0.tgz',
         'some boolean': True,
-    }
+    },
+    'baz@https://example.org/baz.tar.gz': {
+        'version': '3.0.0',
+        'resolved': 'https://example.org/baz.tar.gz',
+    },
 }
 
 EXPECTED_CONTENT = dedent(
@@ -200,6 +204,10 @@ EXPECTED_CONTENT = dedent(
       version "2.0.0"
       resolved "https://registry.yarnpkg.com/bar/-/bar-2.0.0.tgz"
       "some boolean" true
+
+    "baz@https://example.org/baz.tar.gz":
+      version "3.0.0"
+      resolved "https://example.org/baz.tar.gz"
     """
 )
 
