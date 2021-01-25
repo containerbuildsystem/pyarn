@@ -187,6 +187,12 @@ DATA_TO_DUMP = {
         'version': '3.0.0',
         'resolved': 'https://example.org/baz.tar.gz',
     },
+    'spam@^4.0.0, spam@^4.0.1': {
+        'version': '4.0.0',
+    },
+    'eggs@file:some_file, eggs@file:other_file': {
+        'version': '5.0.0',
+    },
 }
 
 EXPECTED_CONTENT = dedent(
@@ -208,6 +214,12 @@ EXPECTED_CONTENT = dedent(
     "baz@https://example.org/baz.tar.gz":
       version "3.0.0"
       resolved "https://example.org/baz.tar.gz"
+
+    spam@^4.0.0, spam@^4.0.1:
+      version "4.0.0"
+
+    "eggs@file:some_file", "eggs@file:other_file":
+      version "5.0.0"
     """
 )
 

@@ -114,12 +114,7 @@ class Lockfile():
 
 def _dump_keyval(key, value, outfile, indent_level):
     outfile.write(' ' * indent_level * 2)
-    if _needs_quoting(key):
-        # TODO: use json.dump to quote the key instead
-        #   (the lexer would also have to interpret strings using json.load)
-        outfile.write(f'"{key}"')
-    else:
-        outfile.write(key)
+    outfile.write(_quote_key_if_needed(key))
 
     if isinstance(value, dict):
         outfile.write(':\n')
@@ -131,11 +126,19 @@ def _dump_keyval(key, value, outfile, indent_level):
         outfile.write(' ')
         if isinstance(value, str):
             # Always quote string values
-            # TODO: see quoting keys
+            # TODO: use json.dump to quote the value instead
+            #   (the lexer would also have to interpret strings using json.load)
             outfile.write(f'"{value}"')
         else:
             json.dump(value, outfile)
         outfile.write('\n')
+
+
+def _quote_key_if_needed(key):
+    # The key may be a comma-separated list of keys
+    keys = map(str.strip, key.split(","))
+    # TODO: quote keys properly, see TODO about quoting values
+    return ", ".join(f'"{k}"' if _needs_quoting(k) else k for k in keys)
 
 
 def _needs_quoting(s):
