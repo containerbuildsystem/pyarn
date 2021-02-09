@@ -28,5 +28,7 @@ devel:
 clean:
 	rm -rf *.egg-info dist build .pytest_cache */__pycache__ pyarn/parsetab.py pyarn/parser.out
 
-build:
+# Let's clean up and make sure PLY's parsetab is created
+build: clean
+	python -c 'from pyarn.lockfile import Lockfile as l; l.from_str("foo bar")'
 	python -m build
