@@ -85,7 +85,7 @@ class Lockfile():
     @classmethod
     def from_str(cls, lockfile_str):
         pyarn_lexer = Wrapper(lex.lex(module=lexer))
-        lockfile_parser = yacc.yacc(module=parser)
+        lockfile_parser = yacc.yacc(module=parser, debug=False)
         parsed_data = lockfile_parser.parse(lockfile_str, lexer=pyarn_lexer)
         version = 'unknown'
         for comment in parsed_data['comments']:
