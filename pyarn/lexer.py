@@ -35,6 +35,13 @@ def t_NUMBER(t):
     return t
 
 
+# Note: this must be defined BEFORE t_STRING, the grammar is ambiguous
+def t_BOOLEAN(t):
+    r'true|false'
+    t.value = (t.value == 'true')
+    return t
+
+
 # Unquoted string regex (see t_STRING)
 # Docstrings cannot use string interpolation, this value is used by other modules
 UNQUOTED_STRING = r'[a-zA-Z/.-][^\s\n,:]*'
@@ -46,12 +53,6 @@ def t_STRING(t):
     r'"[^"\n]*"|[a-zA-Z/.-][^\s\n,:]*'
     if t.value.startswith('"'):
         t.value = t.value[1:-1]
-    elif t.value == 'true':
-        t.value = True
-        t.type = 'BOOLEAN'
-    elif t.value == 'false':
-        t.value = False
-        t.type = 'BOOLEAN'
     return t
 
 

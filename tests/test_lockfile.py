@@ -193,6 +193,11 @@ DATA_TO_DUMP = {
     'eggs@file:some_file, eggs@file:other_file': {
         'version': '5.0.0',
     },
+    'true-case-path@^1.0.2': {
+        'dependencies': {
+            'true-case-path': '^2.0.1'
+        }
+    },
 }
 
 EXPECTED_CONTENT = dedent(
@@ -220,6 +225,10 @@ EXPECTED_CONTENT = dedent(
 
     "eggs@file:some_file", "eggs@file:other_file":
       version "5.0.0"
+
+    "true-case-path@^1.0.2":
+      dependencies:
+        "true-case-path" "^2.0.1"
     """
 )
 
