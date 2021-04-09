@@ -88,6 +88,9 @@ from pyarn import lexer
         ('foo "true"', ['STRING', 'STRING'], ['foo', 'true']),
         ('foo:bar:', ['STRING', 'COLON', 'STRING', 'COLON'], ['foo', ':', 'bar', ':']),
         ('"foo:bar":', ['STRING', 'COLON'], ['foo:bar', ':']),
+        ('true false', ['BOOLEAN', 'BOOLEAN'], [True, False]),
+        ('true-false', ['BOOLEAN', 'STRING'], [True, '-false']),
+        ('not-true', ['STRING'], ['not-true']),
     ],
 )
 def test_lexer(data, expected_types, expected_values):

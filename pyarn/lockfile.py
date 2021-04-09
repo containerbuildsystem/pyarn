@@ -142,4 +142,8 @@ def _quote_key_if_needed(key):
 
 
 def _needs_quoting(s):
+    if s.startswith('true') or s.startswith('false'):
+        # If a string starts with a boolean, it must be quoted no matter what
+        #   (otherwise, the string would be tokenized as BOOLEAN STRING)
+        return True
     return UNQUOTED_STRING_RE.fullmatch(s) is None
