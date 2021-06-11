@@ -31,8 +31,8 @@ UNQUOTED_STRING_RE = re.compile(lexer.UNQUOTED_STRING)
 V1_VERSION_COMMENT = "# yarn lockfile v1"
 
 
-class Package():
-    def __init__(self, name, version, url=None, checksum=None, relpath=None):
+class Package:
+    def __init__(self, name, version, url=None, checksum=None, relpath=None, dependencies=None):
         if not name:
             raise ValueError('Package name was not provided')
 
@@ -44,25 +44,32 @@ class Package():
         self.url = url
         self.checksum = checksum
         self.relpath = relpath
+        self.dependencies = dependencies or {}
 
     @classmethod
     def from_dict(cls, raw_name, data):
         raw_matcher = re.match(r'(?P<name>@?[^@]+)(?:@file:(?P<path>.+))?', raw_name)
         name = raw_matcher.groupdict()['name']
         path = raw_matcher.groupdict()['path']
-        pkg = cls(
-            name, data.get('version'), url=data.get('resolved'),
-            checksum=data.get('integrity'), relpath=path
+
+        return cls(
+            name=name,
+            version=data.get('version'),
+            url=data.get('resolved'),
+            checksum=data.get('integrity'),
+            relpath=path,
+            dependencies=data.get('dependencies', {}),
         )
-        return pkg
 
 
-class Lockfile():
+class Lockfile:
     def __init__(self, version, data):
         self.version = version
         self.data = data
+
         if self.version == 'unknown':
             logger.warning('Unknown Yarn version. Was this lockfile manually edited?')
+
         elif self.version != '1':
             raise ValueError(f'Unsupported yarn.lockfile version: {version}')
 
