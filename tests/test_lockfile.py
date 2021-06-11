@@ -194,6 +194,7 @@ DATA_TO_DUMP = {
         'version': '5.0.0',
     },
     'true-case-path@^1.0.2': {
+        'version': '1.0.2',
         'dependencies': {
             'true-case-path': '^2.0.1'
         }
@@ -227,6 +228,7 @@ EXPECTED_CONTENT = dedent(
       version "5.0.0"
 
     "true-case-path@^1.0.2":
+      version "1.0.2"
       dependencies:
         "true-case-path" "^2.0.1"
     """
@@ -252,3 +254,12 @@ def test_roundtrip(all_test_files, tmp_path):
         original.to_file(out_file)
         generated = lockfile.Lockfile.from_file(out_file)
         assert original.data == generated.data
+
+
+def test_dependencies():
+    lock = lockfile.Lockfile.from_str(EXPECTED_CONTENT)
+
+    package = next(iter(p for p in lock.packages() if p.name == 'foo'))
+    assert package
+    assert package.dependencies
+    assert package.dependencies['bar'] == '^2.0.0'
