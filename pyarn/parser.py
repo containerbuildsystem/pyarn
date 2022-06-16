@@ -57,13 +57,25 @@ def p_block_comment(p):
 def p_title(p):
     """title : STRING COLON INDENT
              | list COLON INDENT"""
+    if isinstance(p[1], str):
+        if ',' in p[1]:
+            raise ValueError(f'Following key has a quoted comma: "{p[1]}"')
+    else:
+        for key in p[1]:
+            if ',' in key:
+                raise ValueError(f'Following key has a quoted comma: "{key}"')
+        p[1] = ', '.join(p[1])
     p[0] = p[1]
 
 
 def p_list(p):
     """list : STRING COMMA STRING
             | list COMMA STRING"""
-    p[0] = ', '.join([p[1], p[3]])
+    if isinstance(p[1], str):
+        p[0] = [p[1], p[3]]
+    else:
+        p[1].append(p[3])
+        p[0] = p[1]
 
 
 def p_members(p):

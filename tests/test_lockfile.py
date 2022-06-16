@@ -59,6 +59,20 @@ def test_from_file():
     assert lock.data == expected
 
 
+@pytest.mark.parametrize(
+    'key, lockfile_str',
+    [
+        ('"foo, bar"', '"foo, bar":\n  version "1.0.0"'),
+        ('"foo, bar"', '"foo, bar", foo2:\n  version "1.0.0"'),
+        ('"foo, bar"', 'foo1, foo2, "foo, bar", foo3:\n  version "1.0.0"'),
+        ('"foo, bar"', 'foo:\n  version "1.0.0"\n"foo, bar":\n  version "1.0.0"'),
+    ]
+)
+def test_key_with_quoted_comma(key, lockfile_str):
+    with pytest.raises(ValueError, match=f'Following key has a quoted comma: {key}'):
+        lockfile.Lockfile.from_str(lockfile_str)
+
+
 def test_v1():
     lock = lockfile.Lockfile.from_str('# yarn lockfile v1\n')
     assert lock.version == '1'
