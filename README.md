@@ -34,3 +34,19 @@ my_lockfile.to_json()
 
 `my_lockfile.data` is a `dict` where the top level keys are the top level entries
 (i.e., the package names) for the `yarn.lock` file entries.
+
+## Releasing
+
+Before releasing a new version to PyPI, don't forget to bump the version number in
+[setup.cfg](./setup.cfg).
+
+Make sure to `git tag` the release commit with the corresponding version and create
+a Github release explaining what is new.
+
+Afterwards, releasing to PyPI is quite simple:
+
+```shell
+make build
+twine check dist/*
+twine upload dist/*
+```
