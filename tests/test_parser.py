@@ -14,8 +14,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-from ply import lex, yacc
 import pytest
+from ply import lex, yacc
 
 from pyarn import lexer, parser
 from pyarn.lexer_wrapper import Wrapper

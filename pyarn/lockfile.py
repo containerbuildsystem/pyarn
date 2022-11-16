@@ -20,9 +20,9 @@ import logging
 import re
 
 from ply import lex, yacc
+
 from pyarn import lexer, parser
 from pyarn.lexer_wrapper import Wrapper
-
 
 logger = logging.getLogger(__name__)
 
