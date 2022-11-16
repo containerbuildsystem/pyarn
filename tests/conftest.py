@@ -22,9 +22,10 @@ import pytest
 @pytest.fixture
 def all_test_files():
     tests_dir = os.path.dirname(__file__)
-    test_data_dir = os.path.join(tests_dir, 'data')
+    test_data_dir = os.path.join(tests_dir, "data")
     test_data = os.listdir(test_data_dir)
     return [
-        os.path.join(test_data_dir, f) for f in test_data
+        os.path.join(test_data_dir, f)
+        for f in test_data
         if os.path.isfile(os.path.join(test_data_dir, f))
     ]

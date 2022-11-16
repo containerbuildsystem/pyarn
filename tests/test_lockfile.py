@@ -24,13 +24,13 @@ from pyarn import lockfile
 
 
 @pytest.mark.parametrize(
-    'data, expected_data',
+    "data, expected_data",
     [
-        ('# comment\n', {}),
-        ('foo "bar"', {'foo': 'bar'}),
-        ('foo "bar"\n# comment\n', {'foo': 'bar'}),
-        ('foo "bar"\n# comment', {'foo': 'bar'}),
-    ]
+        ("# comment\n", {}),
+        ('foo "bar"', {"foo": "bar"}),
+        ('foo "bar"\n# comment\n', {"foo": "bar"}),
+        ('foo "bar"\n# comment', {"foo": "bar"}),
+    ],
 )
 def test_from_str(data, expected_data):
     lock = lockfile.Lockfile.from_str(data)
@@ -38,71 +38,71 @@ def test_from_str(data, expected_data):
 
 
 def test_from_file():
-    file_name = 'single.lock'
+    file_name = "single.lock"
     expected = {
-        'abab@^2.0.0': {
-            'version': '2.0.0',
-            'resolved': (
-                'https://registry.yarnpkg.com/abab/-/abab-2.0.0.tgz#'
-                'aba0ab4c5eee2d4c79d3487d85450fb2376ebb0f'
+        "abab@^2.0.0": {
+            "version": "2.0.0",
+            "resolved": (
+                "https://registry.yarnpkg.com/abab/-/abab-2.0.0.tgz#"
+                "aba0ab4c5eee2d4c79d3487d85450fb2376ebb0f"
             ),
-            'integrity': (
-                'sha512-sY5AXXVZv4Y1VACTtR11UJCPHHudgY5i26Qj5TypE6DKlIApbwb5uqhXcJ5UUGbvZNRh7EeIoW+'
-                'LrJumBsKp7w=='
-            )
+            "integrity": (
+                "sha512-sY5AXXVZv4Y1VACTtR11UJCPHHudgY5i26Qj5TypE6DKlIApbwb5uqhXcJ5UUGbvZNRh7EeIoW+"
+                "LrJumBsKp7w=="
+            ),
         }
     }
     tests_dir = os.path.dirname(__file__)
-    test_data_dir = os.path.join(tests_dir, 'data')
+    test_data_dir = os.path.join(tests_dir, "data")
     test_file = os.path.join(test_data_dir, file_name)
     lock = lockfile.Lockfile.from_file(test_file)
     assert lock.data == expected
 
 
 @pytest.mark.parametrize(
-    'key, lockfile_str',
+    "key, lockfile_str",
     [
         ('"foo, bar"', '"foo, bar":\n  version "1.0.0"'),
         ('"foo, bar"', '"foo, bar", foo2:\n  version "1.0.0"'),
         ('"foo, bar"', 'foo1, foo2, "foo, bar", foo3:\n  version "1.0.0"'),
         ('"foo, bar"', 'foo:\n  version "1.0.0"\n"foo, bar":\n  version "1.0.0"'),
-    ]
+    ],
 )
 def test_key_with_quoted_comma(key, lockfile_str):
-    with pytest.raises(ValueError, match=f'Following key has a quoted comma: {key}'):
+    with pytest.raises(ValueError, match=f"Following key has a quoted comma: {key}"):
         lockfile.Lockfile.from_str(lockfile_str)
 
 
 def test_v1():
-    lock = lockfile.Lockfile.from_str('# yarn lockfile v1\n')
-    assert lock.version == '1'
+    lock = lockfile.Lockfile.from_str("# yarn lockfile v1\n")
+    assert lock.version == "1"
 
 
 def test_no_version(caplog):
-    lockfile.Lockfile.from_str('# comment\n')
-    assert 'Unknown Yarn version. Was this lockfile manually edited?' in caplog.text
+    lockfile.Lockfile.from_str("# comment\n")
+    assert "Unknown Yarn version. Was this lockfile manually edited?" in caplog.text
 
 
-@pytest.mark.parametrize('data', [('# comment\n'), ('foo "bar"'), ('foo "bar"\n# comment\n')])
+@pytest.mark.parametrize("data", [("# comment\n"), ('foo "bar"'), ('foo "bar"\n# comment\n')])
 def test_unknown_version(data):
     lock = lockfile.Lockfile.from_str(data)
-    assert lock.version == 'unknown'
+    assert lock.version == "unknown"
 
 
 def test_invalid_version():
     with pytest.raises(ValueError, match="Unsupported yarn.lockfile version: 2"):
         # Currently, the only way to specify an invalid version is by initializing directly
-        lockfile.Lockfile('2', {})
+        lockfile.Lockfile("2", {})
 
 
 @pytest.mark.parametrize(
-    'data, expected_data',
+    "data, expected_data",
     [
-        ('# comment\n', {}),
-        ('foo "bar"', {'foo': 'bar'}),
-        ('foo "bar"\n# comment\n', {'foo': 'bar'}),
-        ('foo "bar"\n# comment', {'foo': 'bar'}),
-    ]
+        ("# comment\n", {}),
+        ('foo "bar"', {"foo": "bar"}),
+        ('foo "bar"\n# comment\n', {"foo": "bar"}),
+        ('foo "bar"\n# comment', {"foo": "bar"}),
+    ],
 )
 def test_to_json(data, expected_data):
     lock = lockfile.Lockfile.from_str(data)
@@ -114,47 +114,47 @@ def test_packages():
     lock = lockfile.Lockfile.from_str(data)
     packages = lock.packages()
     assert len(packages) == 1
-    assert packages[0].name == 'breakfast'
-    assert packages[0].version == '2.0.0'
+    assert packages[0].name == "breakfast"
+    assert packages[0].version == "2.0.0"
     assert packages[0].checksum is None
     assert packages[0].url is None
     assert packages[0].relpath is None
 
 
 def test_packages_no_version():
-    data = 'breakfast@^1.1.1:\n  eggs bacon'
+    data = "breakfast@^1.1.1:\n  eggs bacon"
     lock = lockfile.Lockfile.from_str(data)
-    with pytest.raises(ValueError, match='Package version was not provided'):
+    with pytest.raises(ValueError, match="Package version was not provided"):
         lock.packages()
 
 
 def test_packages_no_name():
-    with pytest.raises(ValueError, match='Package name was not provided'):
-        lockfile.Package(None, '1.0.0')
+    with pytest.raises(ValueError, match="Package name was not provided"):
+        lockfile.Package(None, "1.0.0")
 
 
 def test_packages_url():
-    url = 'https://example.com/breakfast/1.1.1.tar.gz'
+    url = "https://example.com/breakfast/1.1.1.tar.gz"
     data = f'breakfast@^1.1.1:\n  version "2.0.0"\n  resolved "{url}"'
     lock = lockfile.Lockfile.from_str(data)
     packages = lock.packages()
     assert len(packages) == 1
-    assert packages[0].name == 'breakfast'
-    assert packages[0].version == '2.0.0'
+    assert packages[0].name == "breakfast"
+    assert packages[0].version == "2.0.0"
     assert packages[0].checksum is None
     assert packages[0].url == url
     assert packages[0].relpath is None
 
 
 def test_packages_checksum():
-    url = 'https://example.com/breakfast/1.1.1.tar.gz'
+    url = "https://example.com/breakfast/1.1.1.tar.gz"
     data = f'breakfast@^1.1.1:\n  version "2.0.0"\n  resolved "{url}"\n  integrity someHash'
     lock = lockfile.Lockfile.from_str(data)
     packages = lock.packages()
     assert len(packages) == 1
-    assert packages[0].name == 'breakfast'
-    assert packages[0].version == '2.0.0'
-    assert packages[0].checksum == 'someHash'
+    assert packages[0].name == "breakfast"
+    assert packages[0].version == "2.0.0"
+    assert packages[0].checksum == "someHash"
     assert packages[0].url == url
     assert packages[0].relpath is None
 
@@ -164,11 +164,11 @@ def test_relpath():
     lock = lockfile.Lockfile.from_str(data)
     packages = lock.packages()
     assert len(packages) == 1
-    assert packages[0].name == 'breakfast'
-    assert packages[0].version == '0.0.0'
+    assert packages[0].name == "breakfast"
+    assert packages[0].version == "0.0.0"
     assert packages[0].checksum is None
     assert packages[0].url is None
-    assert packages[0].relpath == 'some/relative/path'
+    assert packages[0].relpath == "some/relative/path"
 
 
 def test_package_with_comma():
@@ -176,42 +176,38 @@ def test_package_with_comma():
     lock = lockfile.Lockfile.from_str(data)
     packages = lock.packages()
     assert len(packages) == 1
-    assert packages[0].name == 'eggs'
-    assert packages[0].version == '1.1.7'
+    assert packages[0].name == "eggs"
+    assert packages[0].version == "1.1.7"
     assert packages[0].checksum is None
     assert packages[0].url is None
     assert packages[0].relpath is None
 
 
 DATA_TO_DUMP = {
-    'foo@^1.0.0': {
-        'version': '1.0.0',
-        'resolved': 'https://registry.yarnpkg.com/foo/-/foo-1.0.0.tgz',
-        'dependencies': {
-            'bar': '^2.0.0'
-        },
-        'some number': 1,
+    "foo@^1.0.0": {
+        "version": "1.0.0",
+        "resolved": "https://registry.yarnpkg.com/foo/-/foo-1.0.0.tgz",
+        "dependencies": {"bar": "^2.0.0"},
+        "some number": 1,
     },
-    'bar@^2.0.0': {
-        'version': '2.0.0',
-        'resolved': 'https://registry.yarnpkg.com/bar/-/bar-2.0.0.tgz',
-        'some boolean': True,
+    "bar@^2.0.0": {
+        "version": "2.0.0",
+        "resolved": "https://registry.yarnpkg.com/bar/-/bar-2.0.0.tgz",
+        "some boolean": True,
     },
-    'baz@https://example.org/baz.tar.gz': {
-        'version': '3.0.0',
-        'resolved': 'https://example.org/baz.tar.gz',
+    "baz@https://example.org/baz.tar.gz": {
+        "version": "3.0.0",
+        "resolved": "https://example.org/baz.tar.gz",
     },
-    'spam@^4.0.0, spam@^4.0.1': {
-        'version': '4.0.0',
+    "spam@^4.0.0, spam@^4.0.1": {
+        "version": "4.0.0",
     },
-    'eggs@file:some_file, eggs@file:other_file': {
-        'version': '5.0.0',
+    "eggs@file:some_file, eggs@file:other_file": {
+        "version": "5.0.0",
     },
-    'true-case-path@^1.0.2': {
-        'version': '1.0.2',
-        'dependencies': {
-            'true-case-path': '^2.0.1'
-        }
+    "true-case-path@^1.0.2": {
+        "version": "1.0.2",
+        "dependencies": {"true-case-path": "^2.0.1"},
     },
 }
 
@@ -251,12 +247,12 @@ EXPECTED_CONTENT = dedent(
 
 def test_to_file(tmp_path):
     output_path = tmp_path / "yarn.lock"
-    lockfile.Lockfile('1', DATA_TO_DUMP).to_file(output_path)
+    lockfile.Lockfile("1", DATA_TO_DUMP).to_file(output_path)
     assert output_path.read_text() == EXPECTED_CONTENT
 
 
 def test_to_str():
-    content = lockfile.Lockfile('1', DATA_TO_DUMP).to_str()
+    content = lockfile.Lockfile("1", DATA_TO_DUMP).to_str()
     assert content == EXPECTED_CONTENT
 
 
@@ -273,7 +269,7 @@ def test_roundtrip(all_test_files, tmp_path):
 def test_dependencies():
     lock = lockfile.Lockfile.from_str(EXPECTED_CONTENT)
 
-    package = next(iter(p for p in lock.packages() if p.name == 'foo'))
+    package = next(iter(p for p in lock.packages() if p.name == "foo"))
     assert package
     assert package.dependencies
-    assert package.dependencies['bar'] == '^2.0.0'
+    assert package.dependencies["bar"] == "^2.0.0"

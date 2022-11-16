@@ -21,18 +21,18 @@ def p_blocks_single(p):
     """blocks : block"""
     if isinstance(p[1], str):
         # comment
-        p[0] = {'comments': [p[1]], 'data': {}}
+        p[0] = {"comments": [p[1]], "data": {}}
     else:
-        p[0] = {'comments': [], 'data': p[1]}
+        p[0] = {"comments": [], "data": p[1]}
 
 
 def p_blocks(p):
     """blocks : blocks block"""
     if isinstance(p[2], str):
         # comment
-        p[1]['comments'].append(p[2])
+        p[1]["comments"].append(p[2])
     else:
-        p[1]['data'].update(p[2])
+        p[1]["data"].update(p[2])
 
     p[0] = p[1]
 
@@ -55,22 +55,26 @@ def p_block_comment(p):
 
 
 def p_title(p):
-    """title : STRING COLON INDENT
-             | list COLON INDENT"""
+    """
+    title : STRING COLON INDENT
+          | list COLON INDENT
+    """
     if isinstance(p[1], str):
-        if ',' in p[1]:
+        if "," in p[1]:
             raise ValueError(f'Following key has a quoted comma: "{p[1]}"')
     else:
         for key in p[1]:
-            if ',' in key:
+            if "," in key:
                 raise ValueError(f'Following key has a quoted comma: "{key}"')
-        p[1] = ', '.join(p[1])
+        p[1] = ", ".join(p[1])
     p[0] = p[1]
 
 
 def p_list(p):
-    """list : STRING COMMA STRING
-            | list COMMA STRING"""
+    """
+    list : STRING COMMA STRING
+         | list COMMA STRING
+    """
     if isinstance(p[1], str):
         p[0] = [p[1], p[3]]
     else:
@@ -136,4 +140,4 @@ def p_comment(p):
 
 
 def p_error(p):
-    raise ValueError(f'error parsing {p}')
+    raise ValueError(f"error parsing {p}")

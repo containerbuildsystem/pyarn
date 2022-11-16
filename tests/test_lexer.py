@@ -21,81 +21,133 @@ from pyarn import lexer
 
 
 @pytest.mark.parametrize(
-    'data, expected_types, expected_values',
+    "data, expected_types, expected_values",
     [
-        ('foo "bar"', ['STRING', 'STRING'], ['foo', 'bar']),
-        ('foo "bar"\n', ['STRING', 'STRING'], ['foo', 'bar']),
-        ('foo  "bar"', ['STRING', 'STRING'], ['foo', 'bar']),
-        ('foo        "bar"', ['STRING', 'STRING'], ['foo', 'bar']),
-        ('"foo" "bar"', ['STRING', 'STRING'], ['foo', 'bar']),
-        ('"foo" "bar"', ['STRING', 'STRING'], ['foo', 'bar']),
+        ('foo "bar"', ["STRING", "STRING"], ["foo", "bar"]),
+        ('foo "bar"\n', ["STRING", "STRING"], ["foo", "bar"]),
+        ('foo  "bar"', ["STRING", "STRING"], ["foo", "bar"]),
+        ('foo        "bar"', ["STRING", "STRING"], ["foo", "bar"]),
+        ('"foo" "bar"', ["STRING", "STRING"], ["foo", "bar"]),
+        ('"foo" "bar"', ["STRING", "STRING"], ["foo", "bar"]),
         (
             'foo:\n  bar "bar"',
-            ['STRING', 'COLON', 'INDENT', 'STRING', 'STRING', 'DEDENT'],
-            ['foo', ':', 1, 'bar', 'bar', 1]
+            ["STRING", "COLON", "INDENT", "STRING", "STRING", "DEDENT"],
+            ["foo", ":", 1, "bar", "bar", 1],
         ),
         (
             'foo:\n  bar:\n  foo "bar"',
-            ['STRING', 'COLON', 'INDENT', 'STRING', 'COLON', 'STRING', 'STRING', 'DEDENT'],
-            ['foo', ':', 1, 'bar', ':', 'foo', 'bar', 1]
+            [
+                "STRING",
+                "COLON",
+                "INDENT",
+                "STRING",
+                "COLON",
+                "STRING",
+                "STRING",
+                "DEDENT",
+            ],
+            ["foo", ":", 1, "bar", ":", "foo", "bar", 1],
         ),
         (
             'foo:\n  bar:\n    foo "bar"',
-            [*['STRING', 'COLON', 'INDENT']*2, 'STRING', 'STRING', 'DEDENT'],
-            ['foo', ':', 1, 'bar', ':', 2, 'foo', 'bar', 2]
+            [*["STRING", "COLON", "INDENT"] * 2, "STRING", "STRING", "DEDENT"],
+            ["foo", ":", 1, "bar", ":", 2, "foo", "bar", 2],
         ),
         (
             'foo:\r\n  bar:\r\n    foo "bar"',
-            [*['STRING', 'COLON', 'INDENT']*2, 'STRING', 'STRING', 'DEDENT'],
-            ['foo', ':', 1, 'bar', ':', 2, 'foo', 'bar', 2]
+            [*["STRING", "COLON", "INDENT"] * 2, "STRING", "STRING", "DEDENT"],
+            ["foo", ":", 1, "bar", ":", 2, "foo", "bar", 2],
         ),
         (
-            'foo:\n  bar:\n    yes no\nbar:\n  yes no',
+            "foo:\n  bar:\n    yes no\nbar:\n  yes no",
             [
-                *['STRING', 'COLON', 'INDENT']*2, 'STRING', 'STRING', 'DEDENT',
-                'STRING', 'COLON', 'INDENT', 'STRING', 'STRING', 'DEDENT'
+                *["STRING", "COLON", "INDENT"] * 2,
+                "STRING",
+                "STRING",
+                "DEDENT",
+                "STRING",
+                "COLON",
+                "INDENT",
+                "STRING",
+                "STRING",
+                "DEDENT",
             ],
             [
-                'foo', ':', 1, 'bar', ':', 2, 'yes', 'no', 2, 'bar', ':',  1,
-                'yes', 'no', 1
+                "foo",
+                ":",
+                1,
+                "bar",
+                ":",
+                2,
+                "yes",
+                "no",
+                2,
+                "bar",
+                ":",
+                1,
+                "yes",
+                "no",
+                1,
             ],
         ),
         (
-            'foo:\r\n  bar:\r\n    yes no\r\nbar:\r\n  yes no',
+            "foo:\r\n  bar:\r\n    yes no\r\nbar:\r\n  yes no",
             [
-                *['STRING', 'COLON', 'INDENT']*2, 'STRING', 'STRING', 'DEDENT',
-                'STRING', 'COLON', 'INDENT', 'STRING', 'STRING', 'DEDENT'
+                *["STRING", "COLON", "INDENT"] * 2,
+                "STRING",
+                "STRING",
+                "DEDENT",
+                "STRING",
+                "COLON",
+                "INDENT",
+                "STRING",
+                "STRING",
+                "DEDENT",
             ],
             [
-                'foo', ':', 1, 'bar', ':', 2, 'yes', 'no', 2, 'bar', ':',  1,
-                'yes', 'no', 1
+                "foo",
+                ":",
+                1,
+                "bar",
+                ":",
+                2,
+                "yes",
+                "no",
+                2,
+                "bar",
+                ":",
+                1,
+                "yes",
+                "no",
+                1,
             ],
         ),
         (
             'foo:\n\n\n  bar "bar"\n',
-            ['STRING', 'COLON', 'INDENT', 'STRING', 'STRING', 'DEDENT'],
-            ['foo', ':', 1, 'bar', 'bar', 1]
+            ["STRING", "COLON", "INDENT", "STRING", "STRING", "DEDENT"],
+            ["foo", ":", 1, "bar", "bar", 1],
         ),
-        ('foo 1', ['STRING', 'NUMBER'], ['foo', 1]),
-        ('foo 42', ['STRING', 'NUMBER'], ['foo', 42]),
+        ("foo 1", ["STRING", "NUMBER"], ["foo", 1]),
+        ("foo 42", ["STRING", "NUMBER"], ["foo", 42]),
         (
-            'foo:\n  answer 42', ['STRING', 'COLON', 'INDENT', 'STRING', 'NUMBER', 'DEDENT'],
-            ['foo', ':', 1, 'answer', 42, 1]
+            "foo:\n  answer 42",
+            ["STRING", "COLON", "INDENT", "STRING", "NUMBER", "DEDENT"],
+            ["foo", ":", 1, "answer", 42, 1],
         ),
-        ('foo true', ['STRING', 'BOOLEAN'], ['foo', True]),
-        ('foo "false"', ['STRING', 'STRING'], ['foo', 'false']),
-        ('foo false', ['STRING', 'BOOLEAN'], ['foo', False]),
-        ('foo "true"', ['STRING', 'STRING'], ['foo', 'true']),
-        ('foo:bar:', ['STRING', 'COLON', 'STRING', 'COLON'], ['foo', ':', 'bar', ':']),
-        ('"foo:bar":', ['STRING', 'COLON'], ['foo:bar', ':']),
-        ('true false', ['BOOLEAN', 'BOOLEAN'], [True, False]),
-        ('true-false', ['BOOLEAN', 'STRING'], [True, '-false']),
-        ('not-true', ['STRING'], ['not-true']),
+        ("foo true", ["STRING", "BOOLEAN"], ["foo", True]),
+        ('foo "false"', ["STRING", "STRING"], ["foo", "false"]),
+        ("foo false", ["STRING", "BOOLEAN"], ["foo", False]),
+        ('foo "true"', ["STRING", "STRING"], ["foo", "true"]),
+        ("foo:bar:", ["STRING", "COLON", "STRING", "COLON"], ["foo", ":", "bar", ":"]),
+        ('"foo:bar":', ["STRING", "COLON"], ["foo:bar", ":"]),
+        ("true false", ["BOOLEAN", "BOOLEAN"], [True, False]),
+        ("true-false", ["BOOLEAN", "STRING"], [True, "-false"]),
+        ("not-true", ["STRING"], ["not-true"]),
     ],
 )
 def test_lexer(data, expected_types, expected_values):
     if len(expected_types) != len(expected_values):
-        msg = f'Length of parameters should match for [{expected_types}, {expected_values}]'
+        msg = f"Length of parameters should match for [{expected_types}, {expected_values}]"
         raise ValueError(msg)
 
     test_lexer = lex.lex(module=lexer)
@@ -109,11 +161,11 @@ def test_lexer(data, expected_types, expected_values):
 
 
 @pytest.mark.parametrize(
-    'data, error',
+    "data, error",
     [
-        ('@', '1: Invalid token @'),
-        ('foo:\n\tbar', '2: Invalid token \tbar'),
-    ]
+        ("@", "1: Invalid token @"),
+        ("foo:\n\tbar", "2: Invalid token \tbar"),
+    ],
 )
 def test_lexer_error(data, error):
     test_lexer = lex.lex(module=lexer)
@@ -125,11 +177,11 @@ def test_lexer_error(data, error):
 
 
 def test_lexer_lineno():
-    data = 'foo\nbar\n\nbaz end'
+    data = "foo\nbar\n\nbaz end"
     test_lexer = lex.lex(module=lexer)
     test_lexer.input(data)
     tokens = list(test_lexer)
-    assert (tokens[0].value, tokens[0].lineno) == ('foo', 1)
-    assert (tokens[1].value, tokens[1].lineno) == ('bar', 2)
-    assert (tokens[2].value, tokens[2].lineno) == ('baz', 4)
-    assert (tokens[3].value, tokens[3].lineno) == ('end', 4)
+    assert (tokens[0].value, tokens[0].lineno) == ("foo", 1)
+    assert (tokens[1].value, tokens[1].lineno) == ("bar", 2)
+    assert (tokens[2].value, tokens[2].lineno) == ("baz", 4)
+    assert (tokens[3].value, tokens[3].lineno) == ("end", 4)

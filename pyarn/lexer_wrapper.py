@@ -16,13 +16,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 
-class Dedent():
+class Dedent:
     def __init__(self):
-        self.type = 'DEDENT'
+        self.type = "DEDENT"
         self.value = 1
 
 
-class Wrapper():
+class Wrapper:
     def __init__(self, lexer):
         self.stack = []
         self.lexer = lexer
@@ -37,7 +37,7 @@ class Wrapper():
         if t is None:
             return t
 
-        if t.type != 'DEDENT':
+        if t.type != "DEDENT":
             return t
 
         while t.value > 1:
