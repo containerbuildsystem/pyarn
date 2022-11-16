@@ -1,3 +1,5 @@
+build
 flake8
 pytest
-build
+pytest-cov
+tox

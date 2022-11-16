@@ -16,8 +16,7 @@
 .PHONY: clean devel check build
 
 check:
-	flake8 tests pyarn
-	pytest -v tests
+	tox
 
 devel:
 	pip install -r requirements-dev.txt
