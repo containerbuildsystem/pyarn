@@ -34,10 +34,10 @@ V1_VERSION_COMMENT = "# yarn lockfile v1"
 class Package:
     def __init__(self, name, version, url=None, checksum=None, relpath=None, dependencies=None):
         if not name:
-            raise ValueError('Package name was not provided')
+            raise ValueError("Package name was not provided")
 
         if not version:
-            raise ValueError('Package version was not provided')
+            raise ValueError("Package version was not provided")
 
         self.name = name
         self.version = version
@@ -48,17 +48,17 @@ class Package:
 
     @classmethod
     def from_dict(cls, raw_name, data):
-        raw_matcher = re.match(r'(?P<name>@?[^@]+)(?:@file:(?P<path>.+))?', raw_name)
-        name = raw_matcher.groupdict()['name']
-        path = raw_matcher.groupdict()['path']
+        raw_matcher = re.match(r"(?P<name>@?[^@]+)(?:@file:(?P<path>.+))?", raw_name)
+        name = raw_matcher.groupdict()["name"]
+        path = raw_matcher.groupdict()["path"]
 
         return cls(
             name=name,
-            version=data.get('version'),
-            url=data.get('resolved'),
-            checksum=data.get('integrity'),
+            version=data.get("version"),
+            url=data.get("resolved"),
+            checksum=data.get("integrity"),
             relpath=path,
-            dependencies=data.get('dependencies', {}),
+            dependencies=data.get("dependencies", {}),
         )
 
 
@@ -67,11 +67,11 @@ class Lockfile:
         self.version = version
         self.data = data
 
-        if self.version == 'unknown':
-            logger.warning('Unknown Yarn version. Was this lockfile manually edited?')
+        if self.version == "unknown":
+            logger.warning("Unknown Yarn version. Was this lockfile manually edited?")
 
-        elif self.version != '1':
-            raise ValueError(f'Unsupported yarn.lockfile version: {version}')
+        elif self.version != "1":
+            raise ValueError(f"Unsupported yarn.lockfile version: {version}")
 
     def to_json(self):
         return json.dumps(self.data, sort_keys=True, indent=4)
@@ -94,14 +94,14 @@ class Lockfile:
         pyarn_lexer = Wrapper(lex.lex(module=lexer))
         lockfile_parser = yacc.yacc(module=parser, debug=False)
         parsed_data = lockfile_parser.parse(lockfile_str, lexer=pyarn_lexer)
-        version = 'unknown'
-        for comment in parsed_data['comments']:
+        version = "unknown"
+        for comment in parsed_data["comments"]:
             if comment == V1_VERSION_COMMENT:
-                version = '1'
-        return cls(version, parsed_data['data'])
+                version = "1"
+        return cls(version, parsed_data["data"])
 
     def to_file(self, path):
-        with open(path, 'w') as lockfile:
+        with open(path, "w") as lockfile:
             self._dump(lockfile)
 
     def to_str(self):
@@ -112,25 +112,25 @@ class Lockfile:
     def _dump(self, outfile):
         # Does not preserve any comments, but this one is required
         outfile.write(V1_VERSION_COMMENT)
-        outfile.write('\n')
+        outfile.write("\n")
         for key, val in self.data.items():
             # Separate top-level keyvals by newline
-            outfile.write('\n')
+            outfile.write("\n")
             _dump_keyval(key, val, outfile, 0)
 
 
 def _dump_keyval(key, value, outfile, indent_level):
-    outfile.write(' ' * indent_level * 2)
+    outfile.write(" " * indent_level * 2)
     outfile.write(_quote_key_if_needed(key))
 
     if isinstance(value, dict):
-        outfile.write(':\n')
+        outfile.write(":\n")
         for k, v in value.items():
             _dump_keyval(k, v, outfile, indent_level + 1)
         # No newline here, _dump_keyval has already added one (recursion always ends
         # with a string, integer or boolean - the grammar does not allow empty dicts)
     else:
-        outfile.write(' ')
+        outfile.write(" ")
         if isinstance(value, str):
             # Always quote string values
             # TODO: use json.dump to quote the value instead
@@ -138,7 +138,7 @@ def _dump_keyval(key, value, outfile, indent_level):
             outfile.write(f'"{value}"')
         else:
             json.dump(value, outfile)
-        outfile.write('\n')
+        outfile.write("\n")
 
 
 def _quote_key_if_needed(key):
@@ -149,7 +149,7 @@ def _quote_key_if_needed(key):
 
 
 def _needs_quoting(s):
-    if s.startswith('true') or s.startswith('false'):
+    if s.startswith("true") or s.startswith("false"):
         # If a string starts with a boolean, it must be quoted no matter what
         #   (otherwise, the string would be tokenized as BOOLEAN STRING)
         return True

@@ -22,46 +22,104 @@ from pyarn.lexer_wrapper import Wrapper
 
 
 @pytest.mark.parametrize(
-    'data, expected_types, expected_values',
+    "data, expected_types, expected_values",
     [
         (
             'foo:\n  bar:\n    foo "bar"',
-            [*['STRING', 'COLON', 'INDENT']*2, 'STRING', 'STRING', 'DEDENT', 'DEDENT'],
-            ['foo', ':', 1, 'bar', ':', 2, 'foo', 'bar', 1, 1]
+            [
+                *["STRING", "COLON", "INDENT"] * 2,
+                "STRING",
+                "STRING",
+                "DEDENT",
+                "DEDENT",
+            ],
+            ["foo", ":", 1, "bar", ":", 2, "foo", "bar", 1, 1],
         ),
         (
             'foo:\r\n  bar:\r\n    foo "bar"',
-            [*['STRING', 'COLON', 'INDENT']*2, 'STRING', 'STRING', 'DEDENT', 'DEDENT'],
-            ['foo', ':', 1, 'bar', ':', 2, 'foo', 'bar', 1, 1]
+            [
+                *["STRING", "COLON", "INDENT"] * 2,
+                "STRING",
+                "STRING",
+                "DEDENT",
+                "DEDENT",
+            ],
+            ["foo", ":", 1, "bar", ":", 2, "foo", "bar", 1, 1],
         ),
         (
-            'foo:\n  bar:\n    yes no\nbar:\n  yes no',
+            "foo:\n  bar:\n    yes no\nbar:\n  yes no",
             [
-                *['STRING', 'COLON', 'INDENT']*2, 'STRING', 'STRING', 'DEDENT', 'DEDENT',
-                'STRING', 'COLON', 'INDENT', 'STRING', 'STRING', 'DEDENT'
+                *["STRING", "COLON", "INDENT"] * 2,
+                "STRING",
+                "STRING",
+                "DEDENT",
+                "DEDENT",
+                "STRING",
+                "COLON",
+                "INDENT",
+                "STRING",
+                "STRING",
+                "DEDENT",
             ],
             [
-                'foo', ':', 1, 'bar', ':', 2, 'yes', 'no', 1, 1, 'bar', ':',  1,
-                'yes', 'no', 1
+                "foo",
+                ":",
+                1,
+                "bar",
+                ":",
+                2,
+                "yes",
+                "no",
+                1,
+                1,
+                "bar",
+                ":",
+                1,
+                "yes",
+                "no",
+                1,
             ],
         ),
         (
-            'foo:\r\n  bar:\r\n    yes no\r\nbar:\r\n  yes no',
+            "foo:\r\n  bar:\r\n    yes no\r\nbar:\r\n  yes no",
             [
-                *['STRING', 'COLON', 'INDENT']*2, 'STRING', 'STRING', 'DEDENT', 'DEDENT',
-                'STRING', 'COLON', 'INDENT', 'STRING', 'STRING', 'DEDENT'
+                *["STRING", "COLON", "INDENT"] * 2,
+                "STRING",
+                "STRING",
+                "DEDENT",
+                "DEDENT",
+                "STRING",
+                "COLON",
+                "INDENT",
+                "STRING",
+                "STRING",
+                "DEDENT",
             ],
             [
-                'foo', ':', 1, 'bar', ':', 2, 'yes', 'no', 1, 1, 'bar', ':',  1,
-                'yes', 'no', 1
+                "foo",
+                ":",
+                1,
+                "bar",
+                ":",
+                2,
+                "yes",
+                "no",
+                1,
+                1,
+                "bar",
+                ":",
+                1,
+                "yes",
+                "no",
+                1,
             ],
         ),
     ],
 )
-@pytest.mark.parametrize('use_iterator', [True, False])
+@pytest.mark.parametrize("use_iterator", [True, False])
 def test_wrapper(data, expected_types, expected_values, use_iterator):
     if len(expected_types) != len(expected_values):
-        msg = f'Length of parameters should match for [{expected_types}, {expected_values}]'
+        msg = f"Length of parameters should match for [{expected_types}, {expected_values}]"
         raise ValueError(msg)
 
     test_lexer = Wrapper(lex.lex(module=lexer))
