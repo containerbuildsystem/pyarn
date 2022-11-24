@@ -1,3 +1,5 @@
+[![Coverage Status](https://coveralls.io/repos/github/containerbuildsystem/pyarn/badge.svg?branch=master)](https://coveralls.io/github/containerbuildsystem/pyarn?branch=master)
+
 # PYarn
 
 If, for some weird reason, you need to parse a Yarn's `yarn.lock` file using
