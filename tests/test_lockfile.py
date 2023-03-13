@@ -16,7 +16,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import json
 import os
+from pathlib import Path
 from textwrap import dedent
+from typing import List
 
 import pytest
 
@@ -273,3 +275,42 @@ def test_dependencies():
     assert package
     assert package.dependencies
     assert package.dependencies["bar"] == "^2.0.0"
+
+
+def test_aliased_packages(test_data_dir: Path):
+    lock = lockfile.Lockfile.from_file(test_data_dir / "aliases.lock")
+
+    packages: List[lockfile.Package] = lock.packages()
+    babel, lodash, fecha, nonsense = packages
+
+    # "babel7-plugin-add-module-exports@npm:babel-plugin-add-module-exports@^1.0.0":
+    #   version "1.0.0"
+
+    # "lodash@npm:@elastic/lodash@3.10.1-kibana1":
+    #   version "3.10.1-kibana1"
+
+    # "date-in-spanish@npm:fecha", fecha@^4.0.0:
+    #   version "4.2.3"
+
+    # "probably-nonsense@npm:what@file:how":
+    #   version "0.0.1"
+
+    assert babel.name == "babel-plugin-add-module-exports"
+    assert babel.alias == "babel7-plugin-add-module-exports"
+    assert babel.version == "1.0.0"
+    assert babel.relpath is None
+
+    assert lodash.name == "@elastic/lodash"
+    assert lodash.alias == "lodash"
+    assert lodash.version == "3.10.1-kibana1"
+    assert lodash.relpath is None
+
+    assert fecha.name == "fecha"
+    assert fecha.alias == "date-in-spanish"
+    assert fecha.version == "4.2.3"
+    assert fecha.relpath is None
+
+    assert nonsense.name == "what"
+    assert nonsense.alias == "probably-nonsense"
+    assert nonsense.version == "0.0.1"
+    assert nonsense.relpath == "how"
