@@ -14,18 +14,17 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-import os
+from pathlib import Path
+from typing import List
 
 import pytest
 
 
 @pytest.fixture
-def all_test_files():
-    tests_dir = os.path.dirname(__file__)
-    test_data_dir = os.path.join(tests_dir, "data")
-    test_data = os.listdir(test_data_dir)
-    return [
-        os.path.join(test_data_dir, f)
-        for f in test_data
-        if os.path.isfile(os.path.join(test_data_dir, f))
-    ]
+def test_data_dir() -> Path:
+    return Path(__file__).parent / "data"
+
+
+@pytest.fixture
+def all_test_files(test_data_dir: Path) -> List[Path]:
+    return [f for f in test_data_dir.iterdir() if f.is_file()]

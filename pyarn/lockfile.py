@@ -18,6 +18,7 @@ import io
 import json
 import logging
 import re
+from typing import Pattern
 
 from ply import lex, yacc
 
@@ -32,7 +33,9 @@ V1_VERSION_COMMENT = "# yarn lockfile v1"
 
 
 class Package:
-    def __init__(self, name, version, url=None, checksum=None, relpath=None, dependencies=None):
+    def __init__(
+        self, name, version, url=None, checksum=None, relpath=None, dependencies=None, alias=None
+    ):
         if not name:
             raise ValueError("Package name was not provided")
 
@@ -45,12 +48,23 @@ class Package:
         self.checksum = checksum
         self.relpath = relpath
         self.dependencies = dependencies or {}
+        self.alias = alias
 
     @classmethod
     def from_dict(cls, raw_name, data):
-        raw_matcher = re.match(r"(?P<name>@?[^@]+)(?:@file:(?P<path>.+))?", raw_name)
-        name = raw_matcher.groupdict()["name"]
-        path = raw_matcher.groupdict()["path"]
+        name_at_version = re.compile(r"(?P<name>@?[^@]+)(?:@(?P<version>[^,]*))?")
+
+        # _version is the version as declared in package.json, not the resolved version
+        name, _version = _must_match(name_at_version, raw_name).groups()
+        alias = None
+        path = None
+
+        if _version and _version.startswith("npm:"):
+            alias = name
+            name, _version = _must_match(name_at_version, _remove_prefix(_version, "npm:")).groups()
+
+        if _version and _version.startswith("file:"):
+            path = _remove_prefix(_version, "file:")
 
         return cls(
             name=name,
@@ -59,7 +73,19 @@ class Package:
             checksum=data.get("integrity"),
             relpath=path,
             dependencies=data.get("dependencies", {}),
+            alias=alias,
         )
+
+
+def _remove_prefix(s: str, prefix: str) -> str:
+    return s[len(prefix) :]
+
+
+def _must_match(pat: Pattern, s: str) -> re.Match:
+    match = pat.match(s)
+    if not match:
+        raise ValueError(f"Unexpected format: {s!r} (does not match {pat.pattern})")
+    return match
 
 
 class Lockfile:
