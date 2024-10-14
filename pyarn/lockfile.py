@@ -18,7 +18,8 @@ import io
 import json
 import logging
 import re
-from typing import Pattern
+from pathlib import Path
+from typing import Optional, Pattern
 
 from ply import lex, yacc
 
@@ -91,8 +92,8 @@ class Package:
             alias = name
             name, _version = _must_match(name_at_version, _remove_prefix(_version, "npm:")).groups()
 
-        if _version and _version.startswith("file:"):
-            path = _remove_prefix(_version, "file:")
+        if _version:
+            path = cls.get_path_from_version_specifier(_version)
 
         return cls(
             name=name,
@@ -103,6 +104,22 @@ class Package:
             dependencies=data.get("dependencies", {}),
             alias=alias,
         )
+
+    @staticmethod
+    def get_path_from_version_specifier(version: str) -> Optional[str]:
+        """Return the path from a package.json file dependency version specifier."""
+        version_path = Path(version)
+
+        if version.startswith("file:"):
+            return _remove_prefix(version, "file:")
+        elif version.startswith("link:"):
+            return _remove_prefix(version, "link:")
+        elif version_path.is_absolute() or version.startswith(("./", "../")):
+            return str(version_path)
+        else:
+            # Some non-path version specifier, (e.g. "1.0.0" or a web link)
+            # See https://docs.npmjs.com/cli/v10/configuring-npm/package-json#dependencies
+            return None
 
 
 def _remove_prefix(s: str, prefix: str) -> str:
