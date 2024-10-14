@@ -161,8 +161,37 @@ def test_packages_checksum():
     assert packages[0].path is None
 
 
-def test_path():
-    data = '"breakfast@file:some/relative/path":\n  version "0.0.0"'
+@pytest.mark.parametrize(
+    "data, expected_path",
+    [
+        pytest.param(
+            '"breakfast@file:some/relative/path":\n  version "0.0.0"',
+            "some/relative/path",
+            id="relpath_with_file_prefix",
+        ),
+        pytest.param(
+            '"breakfast@link:some/relative/path":\n  version "0.0.0"',
+            "some/relative/path",
+            id="relpath_with_link_prefix",
+        ),
+        pytest.param(
+            '"breakfast@./some/relative/path":\n  version "0.0.0"',
+            "some/relative/path",
+            id="relpath_with_dot_prefix",
+        ),
+        pytest.param(
+            '"breakfast@../some/relative/path":\n  version "0.0.0"',
+            "../some/relative/path",
+            id="relpath_to_parent_dir",
+        ),
+        pytest.param(
+            '"breakfast@/some/absolute/path":\n  version "0.0.0"',
+            "/some/absolute/path",
+            id="absolute_path",
+        ),
+    ],
+)
+def test_package_with_path(data: str, expected_path: str) -> None:
     lock = lockfile.Lockfile.from_str(data)
     packages = lock.packages()
     assert len(packages) == 1
@@ -170,8 +199,8 @@ def test_path():
     assert packages[0].version == "0.0.0"
     assert packages[0].checksum is None
     assert packages[0].url is None
-    assert packages[0].path == "some/relative/path"
-    assert packages[0].relpath == "some/relative/path"  # test backwards compatibility
+    assert packages[0].path == expected_path
+    assert packages[0].relpath == expected_path  # test backwards compatibility
 
 
 def test_package_with_comma():
