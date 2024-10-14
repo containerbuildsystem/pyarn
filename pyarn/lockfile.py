@@ -34,7 +34,15 @@ V1_VERSION_COMMENT = "# yarn lockfile v1"
 
 class Package:
     def __init__(
-        self, name, version, url=None, checksum=None, relpath=None, dependencies=None, alias=None
+        self,
+        name,
+        version,
+        url=None,
+        checksum=None,
+        path=None,
+        relpath=None,
+        dependencies=None,
+        alias=None,
     ):
         if not name:
             raise ValueError("Package name was not provided")
@@ -46,9 +54,29 @@ class Package:
         self.version = version
         self.url = url
         self.checksum = checksum
-        self.relpath = relpath
+        self.path = path if path is not None else relpath
         self.dependencies = dependencies or {}
         self.alias = alias
+
+    @property
+    def relpath(self) -> Optional[str]:
+        """
+        Return the path to the package.
+
+        This is strictly kept for backwards compatibility and path should be used directly
+        instead. The path is not always relative and may be absolute.
+        """
+        return self.path
+
+    @relpath.setter
+    def relpath(self, path: Optional[str]) -> None:
+        """
+        Set the path to the package.
+
+        This is strictly kept for backwards compatibility and path should be used directly
+        instead. The path is not always relative and may be absolute.
+        """
+        self.path = path
 
     @classmethod
     def from_dict(cls, raw_name, data):
@@ -71,7 +99,7 @@ class Package:
             version=data.get("version"),
             url=data.get("resolved"),
             checksum=data.get("integrity"),
-            relpath=path,
+            path=path,
             dependencies=data.get("dependencies", {}),
             alias=alias,
         )

@@ -120,7 +120,7 @@ def test_packages():
     assert packages[0].version == "2.0.0"
     assert packages[0].checksum is None
     assert packages[0].url is None
-    assert packages[0].relpath is None
+    assert packages[0].path is None
 
 
 def test_packages_no_version():
@@ -145,7 +145,7 @@ def test_packages_url():
     assert packages[0].version == "2.0.0"
     assert packages[0].checksum is None
     assert packages[0].url == url
-    assert packages[0].relpath is None
+    assert packages[0].path is None
 
 
 def test_packages_checksum():
@@ -158,10 +158,10 @@ def test_packages_checksum():
     assert packages[0].version == "2.0.0"
     assert packages[0].checksum == "someHash"
     assert packages[0].url == url
-    assert packages[0].relpath is None
+    assert packages[0].path is None
 
 
-def test_relpath():
+def test_path():
     data = '"breakfast@file:some/relative/path":\n  version "0.0.0"'
     lock = lockfile.Lockfile.from_str(data)
     packages = lock.packages()
@@ -170,7 +170,8 @@ def test_relpath():
     assert packages[0].version == "0.0.0"
     assert packages[0].checksum is None
     assert packages[0].url is None
-    assert packages[0].relpath == "some/relative/path"
+    assert packages[0].path == "some/relative/path"
+    assert packages[0].relpath == "some/relative/path"  # test backwards compatibility
 
 
 def test_package_with_comma():
@@ -182,7 +183,7 @@ def test_package_with_comma():
     assert packages[0].version == "1.1.7"
     assert packages[0].checksum is None
     assert packages[0].url is None
-    assert packages[0].relpath is None
+    assert packages[0].path is None
 
 
 DATA_TO_DUMP = {
@@ -298,19 +299,19 @@ def test_aliased_packages(test_data_dir: Path):
     assert babel.name == "babel-plugin-add-module-exports"
     assert babel.alias == "babel7-plugin-add-module-exports"
     assert babel.version == "1.0.0"
-    assert babel.relpath is None
+    assert babel.path is None
 
     assert lodash.name == "@elastic/lodash"
     assert lodash.alias == "lodash"
     assert lodash.version == "3.10.1-kibana1"
-    assert lodash.relpath is None
+    assert lodash.path is None
 
     assert fecha.name == "fecha"
     assert fecha.alias == "date-in-spanish"
     assert fecha.version == "4.2.3"
-    assert fecha.relpath is None
+    assert fecha.path is None
 
     assert nonsense.name == "what"
     assert nonsense.alias == "probably-nonsense"
     assert nonsense.version == "0.0.1"
-    assert nonsense.relpath == "how"
+    assert nonsense.path == "how"
