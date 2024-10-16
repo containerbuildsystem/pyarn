@@ -123,16 +123,21 @@ def test_packages():
     assert packages[0].path is None
 
 
-def test_packages_no_version():
+def test_lock_packages_no_version():
     data = "breakfast@^1.1.1:\n  eggs bacon"
     lock = lockfile.Lockfile.from_str(data)
     with pytest.raises(ValueError, match="Package version was not provided"):
         lock.packages()
 
 
+def test_package_no_version():
+    with pytest.raises(ValueError, match="Package version was not provided"):
+        lockfile.Package("breakfast", None)  # type: ignore[arg-type]
+
+
 def test_packages_no_name():
     with pytest.raises(ValueError, match="Package name was not provided"):
-        lockfile.Package(None, "1.0.0")
+        lockfile.Package(None, "1.0.0")  # type: ignore[arg-type]
 
 
 def test_packages_url():
